@@ -11,7 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static com.solvemeup.smucoreapi.domain.user.enums.Role.*;
 import static com.solvemeup.smucoreapi.domain.user.enums.Status.*;
@@ -61,9 +61,9 @@ public class User {
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
-    private LocalDateTime deletedAt;
+    private Instant deletedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

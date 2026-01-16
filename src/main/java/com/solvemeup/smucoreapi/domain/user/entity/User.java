@@ -13,8 +13,8 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
 
-import static com.solvemeup.smucoreapi.domain.user.enums.Role.*;
-import static com.solvemeup.smucoreapi.domain.user.enums.Status.*;
+import static com.solvemeup.smucoreapi.domain.user.enums.Role.USER;
+import static com.solvemeup.smucoreapi.domain.user.enums.Status.ACTIVE;
 
 @Entity
 @Table(
@@ -46,10 +46,13 @@ public class User {
     @Column(nullable = false, unique = true, length = 20)
     private String nickname;
 
+    @Column(length = 2083)
     private String profileImageUrl;
 
+    @Column(length = 2083)
     private String githubUrl;
 
+    @Column(length = 2083)
     private String techblogUrl;
 
     @Column(nullable = false)
@@ -76,7 +79,8 @@ public class User {
     public static User createUser(OAuth2Provider oauth2Provider,
                                   String oauth2ProviderId,
                                   String nickname,
-                                  String profileImageUrl) {
+                                  String profileImageUrl
+    ) {
         User user = new User();
         user.oauth2Provider = oauth2Provider;
         user.oauth2ProviderId = oauth2ProviderId;

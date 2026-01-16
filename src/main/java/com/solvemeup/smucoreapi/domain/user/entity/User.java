@@ -8,6 +8,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +24,8 @@ import static com.solvemeup.smucoreapi.domain.user.enums.Status.*;
                 @Index(name = "idx_users_nickname", columnList = "nickname")
         }
 )
+@SQLRestriction("status <> 'DELETED'")
+@SQLDelete(sql = "UPDATE users SET status='DELETED', deleted_at=NOW() WHERE id=?")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {

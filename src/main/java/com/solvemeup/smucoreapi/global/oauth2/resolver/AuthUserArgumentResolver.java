@@ -1,6 +1,6 @@
 package com.solvemeup.smucoreapi.global.oauth2.resolver;
 
-import com.solvemeup.smucoreapi.global.exception.UnauthorizedException;
+import com.solvemeup.smucoreapi.global.oauth2.exception.UnauthorizedException;
 import com.solvemeup.smucoreapi.global.oauth2.annotation.AuthUser;
 import com.solvemeup.smucoreapi.global.oauth2.session.UserSession;
 import jakarta.servlet.http.HttpServletRequest;

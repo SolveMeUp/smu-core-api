@@ -28,23 +28,16 @@ public record UserProfileResponseDTO(
         );
     }
 
-    private String nickname;
-    private String profileImageUrl;
-    private String githubUrl;
-    private String techblogUrl;
-    private int rating;
-    private Role role;
-    private Status status;
-
-    public static UserProfileResponseDTO from(User user) {
-        return UserProfileResponseDTO.builder()
-                .nickname(user.getNickname())
-                .profileImageUrl(user.getProfileImageUrl())
-                .githubUrl(user.getGithubUrl())
-                .techblogUrl(user.getTechblogUrl())
-                .rating(user.getRating())
-                .role(user.getRole())
-                .status(user.getStatus())
-                .build();
+    public static UserProfileResponseDTO from(UserRankingProjection p) {
+        return new UserProfileResponseDTO(
+                p.getNickname(),
+                p.getProfileImageUrl(),
+                p.getGithubUrl(),
+                p.getTechblogUrl(),
+                p.getRating(),
+                Role.valueOf(p.getRole()),
+                Status.valueOf(p.getStatus()),
+                p.getRank()
+        );
     }
 }

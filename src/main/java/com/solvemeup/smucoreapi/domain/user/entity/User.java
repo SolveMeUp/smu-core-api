@@ -43,7 +43,7 @@ public class User {
 
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, length = 20)
     private String nickname;
 
     private String profileImageUrl;

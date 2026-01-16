@@ -21,7 +21,7 @@ import static com.solvemeup.smucoreapi.domain.user.enums.Status.*;
         name = "users",
         uniqueConstraints = @UniqueConstraint(columnNames = {"oauth2Provider", "oauth2ProviderId"}),
         indexes = {
-                @Index(name = "idx_users_nickname", columnList = "nickname")
+                @Index(name = "idx_users_rating_id", columnList = "rating, id")
         }
 )
 @SQLRestriction("status <> 'DELETED'")

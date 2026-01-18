@@ -86,4 +86,46 @@ public class PostController {
         postService.react(userSession.id(), postId, ReactionType.DISLIKE);
         return ResponseEntity.ok().build();
     }
+
+    /*
+    댓글 api 일단 여기로
+     */
+
+    @PostMapping("/{postId}/comments")
+    public ResponseEntity<CommentResponse> createComment(
+            @AuthUser UserSession userSession,
+            @PathVariable Long postId,
+            @Valid @RequestBody CommentCreateRequest request
+    ) {
+        CommentResponse response = commentService.create(userSession.id(), postId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @DeleteMapping("/{postId}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @AuthUser UserSession userSession,
+            @PathVariable Long postId,
+            @PathVariable Long commentId
+    ) {
+        commentService.delete(userSession.id(), postId, commentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/comments/{commentId}/likes")
+    public ResponseEntity<Void> likeComment(
+            @AuthUser UserSession userSession,
+            @PathVariable Long commentId
+    ) {
+        commentService.react(userSession.id(), commentId, ReactionType.LIKE);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/comments/{commentId}/dislikes")
+    public ResponseEntity<Void> dislikeComment(
+            @AuthUser UserSession userSession,
+            @PathVariable Long commentId
+    ) {
+        commentService.react(userSession.id(), commentId, ReactionType.DISLIKE);
+        return ResponseEntity.ok().build();
+    }
 }

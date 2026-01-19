@@ -3,9 +3,10 @@ package com.solvemeup.smucoreapi.domain.user.controller;
 import com.solvemeup.smucoreapi.domain.user.dto.response.MyProfileResponseDTO;
 import com.solvemeup.smucoreapi.domain.user.dto.response.UserProfileResponseDTO;
 import com.solvemeup.smucoreapi.domain.user.service.UserService;
+import com.solvemeup.smucoreapi.global.auth.AuthUserId;
 import com.solvemeup.smucoreapi.global.dto.PageResponse;
-import com.solvemeup.smucoreapi.global.oauth2.annotation.AuthUser;
-import com.solvemeup.smucoreapi.global.oauth2.session.UserSession;
+import com.solvemeup.smucoreapi.global.auth.AuthUser;
+import com.solvemeup.smucoreapi.global.oauth2.principal.CustomOAuth2User;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<MyProfileResponseDTO> getMyProfile(@AuthUser UserSession userSession) {
-        return ResponseEntity.ok(userService.getMyProfile(userSession.id()));
+    public ResponseEntity<MyProfileResponseDTO> getMyProfile(@AuthUserId Long userId) {
+        return ResponseEntity.ok(userService.getMyProfile(userId));
     }
 }

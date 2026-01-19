@@ -17,6 +17,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByNickname(String nickname);
 
+    @Query(value = """
+            SELECT COUNT(*) + 1
+            FROM users u
+            WHERE u.status != 'DELETED' AND u.rating > :rating
+            """, nativeQuery = true)
+    long calcCompetitionRankByRating(@Param("rating") int rating);
+
     @Query(
             value = """
                     SELECT
@@ -40,11 +47,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
             nativeQuery = true
     )
     Page<UserRankingProjection> findRankingWithRank(Pageable pageable);
-
-    @Query(value = """
-            SELECT COUNT(*) + 1
-            FROM users u
-            WHERE u.status != 'DELETED' AND u.rating > :rating
-            """, nativeQuery = true)
-    long calcCompetitionRankByRating(@Param("rating") int rating);
 }

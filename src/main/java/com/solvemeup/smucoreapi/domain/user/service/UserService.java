@@ -18,6 +18,13 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    public MyProfileResponseDTO getMyProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        return MyProfileResponseDTO.from(user, userRepository.calcCompetitionRankByRating(user.getRating()));
+    }
+
     public Page<UserProfileResponseDTO> getRanking(Pageable pageable) {
         return userRepository.findRankingWithRank(pageable)
                 .map(UserProfileResponseDTO::from);
@@ -30,14 +37,5 @@ public class UserService {
         long rank = userRepository.calcCompetitionRankByRating(user.getRating());
 
         return UserProfileResponseDTO.from(user, rank);
-    }
-
-    public MyProfileResponseDTO getMyProfile(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
-        long rank = userRepository.calcCompetitionRankByRating(user.getRating());
-
-        return MyProfileResponseDTO.from(user, rank);
     }
 }

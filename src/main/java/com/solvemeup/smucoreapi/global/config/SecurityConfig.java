@@ -35,11 +35,17 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults());
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                        "/oauth2/**",
-                        "/login/**"
-                ).permitAll()
-                .anyRequest().permitAll()
+                .requestMatchers("/", "/index.html").permitAll()
+                .requestMatchers("/oauth2/**", "/login/**", "/error").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                .requestMatchers("/api/users/me").authenticated()
+                .requestMatchers("/api/users/me/**").authenticated()
+
+                .requestMatchers("/api/users/**").permitAll()
+                .requestMatchers("/api/posts/**").permitAll()
+
+                .anyRequest().authenticated()
         );
 
         http.oauth2Login(oauth2 -> oauth2

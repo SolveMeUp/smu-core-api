@@ -26,6 +26,16 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,9 +52,22 @@ jobs:
 
       - name: Build & Test
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/smu_test
-          SPRING_DATASOURCE_USERNAME: smu
-          SPRING_DATASOURCE_PASSWORD: smu1234
+          # application.yml이 요구하는 DB_* 형태로 맞춰줌
+          DB_HOST: localhost
+          DB_PORT: 3306
+          DB_NAME: smu_test
+          DB_USERNAME: smu
+          DB_PASSWORD: smu1234
+
+          # redis placeholders 채움
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+
+          # oauth/app placeholders 더미값(테스트에서 실제 인증 안 하면 더미로 충분)
+          GITHUB_CLIENT_ID: dummy
+          GITHUB_CLIENT_SECRET: dummy
+          LOGIN_SUCCESS_REDIRECT_URI: http://localhost
+
+          # JPA 테스트용
           SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
-          SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
-        run: ./gradlew clean build
+        run: ./gradlew clean test

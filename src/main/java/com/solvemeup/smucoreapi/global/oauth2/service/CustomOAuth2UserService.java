@@ -74,6 +74,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
         }
 
-        throw new NicknameGenerationFailedException(RETRY_LIMIT, lastException);
+        throw new NicknameGenerationFailedException(lastException);
     }
 }

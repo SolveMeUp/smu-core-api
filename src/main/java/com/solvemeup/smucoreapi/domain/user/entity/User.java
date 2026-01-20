@@ -25,7 +25,7 @@ import static com.solvemeup.smucoreapi.domain.user.enums.Status.ACTIVE;
         }
 )
 @SQLRestriction("status <> 'DELETED'")
-@SQLDelete(sql = "UPDATE users SET status='DELETED', deleted_at=NOW() WHERE id=?")
+@SQLDelete(sql = "UPDATE users SET status='DELETED', deleted_at=NOW() WHERE id=? AND version=?")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {

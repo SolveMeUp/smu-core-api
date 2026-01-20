@@ -1,7 +1,12 @@
 package com.solvemeup.smucoreapi.domain.user.exception;
 
-public class NicknameGenerationFailedException extends RuntimeException {
-    public NicknameGenerationFailedException(int retryLimit, Throwable cause) {
-        super("Failed to generate unique nickname after " + retryLimit + " attempts", cause);
+import com.solvemeup.smucoreapi.global.exception.CustomException;
+
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.*;
+
+public class NicknameGenerationFailedException extends CustomException {
+
+    public NicknameGenerationFailedException(Throwable cause) {
+        super(NICKNAME_GENERATION_FAILED, cause);
     }
 }

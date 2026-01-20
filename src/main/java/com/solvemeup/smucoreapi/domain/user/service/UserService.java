@@ -33,17 +33,15 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    public UserProfileResponseDTO getUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        return UserProfileResponseDTO.from(user, userRepository.calcCompetitionRankByRating(user.getRating()));
+    }
+
     public Page<UserProfileResponseDTO> getRanking(Pageable pageable) {
         return userRepository.findRankingWithRank(pageable)
                 .map(UserProfileResponseDTO::from);
-    }
-
-    public UserProfileResponseDTO getUser(String nickname) {
-        User user = userRepository.findByNickname(nickname)
-                .orElseThrow(() -> new UserNotFoundException(nickname));
-
-        long rank = userRepository.calcCompetitionRankByRating(user.getRating());
-
-        return UserProfileResponseDTO.from(user, rank);
     }
 }

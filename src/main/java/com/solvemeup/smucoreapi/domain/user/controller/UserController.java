@@ -33,16 +33,16 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserProfileResponseDTO> getUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUser(userId));
+    }
+
     @GetMapping("/ranking")
     public ResponseEntity<PageResponse<UserProfileResponseDTO>> getRanking(@RequestParam(defaultValue = "0") @Min(0) @Max(100000) int page,
                                                                            @RequestParam(defaultValue = "100") @Min(10) @Max(100) int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(PageResponse.from(userService.getRanking(pageable)));
-    }
-
-    @GetMapping("/profile/{nickname}")
-    public ResponseEntity<UserProfileResponseDTO> getUser(@PathVariable String nickname) {
-        return ResponseEntity.ok(userService.getUser(nickname));
     }
 }

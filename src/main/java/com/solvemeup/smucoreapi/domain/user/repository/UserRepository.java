@@ -15,8 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByOauth2ProviderAndOauth2ProviderId(OAuth2Provider oauth2Provider, String oauth2ProviderId);
 
-    Optional<User> findByNickname(String nickname);
-
     @Query(value = """
             SELECT COUNT(*) + 1
             FROM users u
@@ -24,21 +22,22 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """, nativeQuery = true)
     long calcCompetitionRankByRating(@Param("rating") int rating);
 
-    @Query(
-            value = """
-                    SELECT
-                        u.nickname AS nickname,
-                        u.profile_image_url AS profileImageUrl,
-                        u.github_url AS githubUrl,
-                        u.techblog_url AS techblogUrl,
-                        u.rating AS rating,
-                        u.role AS role,
-                        u.status AS status,
-                        RANK() OVER (ORDER BY u.rating DESC) AS `rank`
-                    FROM users u
-                    WHERE u.status != 'DELETED'
-                    ORDER BY u.rating DESC, u.id
-                    """,
+    @Query(value = """
+            SELECT
+                u.id AS id,
+                u.oauth2_provider AS oAuth2Provider,
+                u.nickname AS nickname,
+                u.profile_image_url AS profileImageUrl,
+                u.github_url AS githubUrl,
+                u.techblog_url AS techblogUrl,
+                u.rating AS rating,
+                u.role AS role,
+                u.status AS status,
+                RANK() OVER (ORDER BY u.rating DESC) AS `rank`
+            FROM users u
+            WHERE u.status != 'DELETED'
+            ORDER BY u.rating DESC, u.id
+            """,
             countQuery = """
                     SELECT COUNT(*)
                     FROM users u

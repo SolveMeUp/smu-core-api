@@ -1,5 +1,10 @@
 package com.solvemeup.smucoreapi.domain.user.service;
 
+import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyEmailRequestDTO;
+import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyGithubUrlRequestDTO;
+import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyNicknameRequestDTO;
+import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyTechblogUrlRequestDTO;
+import com.solvemeup.smucoreapi.domain.user.exception.NicknameAlreadyExistsException;
 import com.solvemeup.smucoreapi.domain.user.exception.UserNotFoundException;
 import com.solvemeup.smucoreapi.domain.user.dto.response.MyProfileResponseDTO;
 import com.solvemeup.smucoreapi.domain.user.dto.response.UserProfileResponseDTO;
@@ -33,16 +38,79 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public UserProfileResponseDTO getUser(Long userId) {
+
+    @Transactional
+    public void updateMyEmail(Long userId, UpdateMyEmailRequestDTO requestDTO) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        return UserProfileResponseDTO.from(user, userRepository.calcCompetitionRankByRating(user.getRating()));
+        user.updateEmail(requestDTO.email());
+    }
+
+    @Transactional
+    public void deleteMyEmail(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        user.updateEmail(null);
+    }
+
+    @Transactional
+    public void updateMyNickname(Long userId, UpdateMyNicknameRequestDTO requestDTO) {
+        String nickname = requestDTO.nickname().trim();
+
+        if (userRepository.existsByNickname(nickname)) {
+            throw new NicknameAlreadyExistsException();
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        user.updateNickname(nickname);
+    }
+
+    @Transactional
+    public void updateMyGithubUrl(Long userId, UpdateMyGithubUrlRequestDTO request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        user.updateGithubUrl(request.githubUrl());
+    }
+
+    @Transactional
+    public void deleteMyGithubUrl(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        user.updateGithubUrl(null);
+    }
+
+    @Transactional
+    public void updateMyTechblogUrl(Long userId, UpdateMyTechblogUrlRequestDTO request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        user.updateTechblogUrl(request.techblogUrl());
+    }
+
+    @Transactional
+    public void deleteMyTechblogUrl(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        user.updateTechblogUrl(null);
     }
 
     public Page<UserProfileResponseDTO> getRanking(Pageable pageable) {
         return userRepository.findRankingWithRank(pageable)
                 .map(UserProfileResponseDTO::from);
+    }
+
+    public UserProfileResponseDTO getUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        return UserProfileResponseDTO.from(user, userRepository.calcCompetitionRankByRating(user.getRating()));
     }
 
     public boolean checkNicknameAvailability(String nickname) {

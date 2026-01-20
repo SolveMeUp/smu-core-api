@@ -18,6 +18,8 @@ public enum ErrorCode {
     // User
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER-001", "유저를 찾을 수 없습니다."),
     NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "USER-002", "닉네임 생성에 실패했습니다."),
+    INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "USER-003", "닉네임이 올바르지 않습니다."),
+    NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER-004", "중복된 닉네임입니다."),
 
     // Common
     COMMON_BAD_REQUEST(HttpStatus.BAD_REQUEST, "COMMON-001", "잘못된 요청입니다."),

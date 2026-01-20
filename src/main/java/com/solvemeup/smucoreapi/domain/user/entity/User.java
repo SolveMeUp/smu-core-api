@@ -3,6 +3,7 @@ package com.solvemeup.smucoreapi.domain.user.entity;
 import com.solvemeup.smucoreapi.domain.user.enums.OAuth2Provider;
 import com.solvemeup.smucoreapi.domain.user.enums.Role;
 import com.solvemeup.smucoreapi.domain.user.enums.Status;
+import com.solvemeup.smucoreapi.domain.user.exception.InvalidNicknameException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -90,5 +91,32 @@ public class User {
         user.status = ACTIVE;
         user.rating = 0;
         return user;
+    }
+
+    public void updateEmail(String email) {
+        this.email = normalizeNullableString(email);
+    }
+
+    public void updateNickname(String nickname) {
+        if (nickname == null || nickname.trim().isBlank()) {
+            throw new InvalidNicknameException();
+        }
+
+        this.nickname = nickname.trim();
+    }
+
+    public void updateGithubUrl(String githubUrl) {
+        this.githubUrl = normalizeNullableString(githubUrl);
+    }
+
+    public void updateTechblogUrl(String techblogUrl) {
+        this.techblogUrl = normalizeNullableString(techblogUrl);
+    }
+
+    private String normalizeNullableString(String value) {
+        if (value == null) return null;
+
+        String trimmed = value.trim();
+        return trimmed.isBlank() ? null : trimmed;
     }
 }

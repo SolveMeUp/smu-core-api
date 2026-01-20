@@ -25,6 +25,14 @@ public class UserService {
         return MyProfileResponseDTO.from(user, userRepository.calcCompetitionRankByRating(user.getRating()));
     }
 
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        userRepository.delete(user);
+    }
+
     public Page<UserProfileResponseDTO> getRanking(Pageable pageable) {
         return userRepository.findRankingWithRank(pageable)
                 .map(UserProfileResponseDTO::from);

@@ -27,6 +27,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getMyProfile(userId));
     }
 
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteUser(@AuthUserId Long userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/ranking")
     public ResponseEntity<PageResponse<UserProfileResponseDTO>> getRanking(@RequestParam(defaultValue = "0") @Min(0) @Max(100000) int page,
                                                                            @RequestParam(defaultValue = "100") @Min(10) @Max(100) int size

@@ -15,12 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByOauth2ProviderAndOauth2ProviderId(OAuth2Provider oauth2Provider, String oauth2ProviderId);
 
-    @Query(value = """
-            SELECT COUNT(*) + 1
-            FROM users u
-            WHERE u.status != 'DELETED' AND u.rating > :rating
-            """, nativeQuery = true)
-    long calcCompetitionRankByRating(@Param("rating") int rating);
+    boolean existsByNickname(String nickname);
 
     @Query(value = """
             SELECT
@@ -47,5 +42,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     )
     Page<UserRankingProjection> findRankingWithRank(Pageable pageable);
 
-    boolean existsByNickname(String nickname);
+    @Query(value = """
+            SELECT COUNT(*) + 1
+            FROM users u
+            WHERE u.status != 'DELETED' AND u.rating > :rating
+            """, nativeQuery = true)
+    long calcCompetitionRankByRating(@Param("rating") int rating);
 }

@@ -44,4 +44,8 @@ public class UserService {
         return userRepository.findRankingWithRank(pageable)
                 .map(UserProfileResponseDTO::from);
     }
+
+    public boolean checkNicknameAvailability(String nickname) {
+        return !userRepository.existsByNickname(nickname);
+    }
 }

@@ -46,4 +46,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             nativeQuery = true
     )
     Page<UserRankingProjection> findRankingWithRank(Pageable pageable);
+
+    boolean existsByNickname(String nickname);
 }

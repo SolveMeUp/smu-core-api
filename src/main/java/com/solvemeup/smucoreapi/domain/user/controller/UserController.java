@@ -1,12 +1,14 @@
 package com.solvemeup.smucoreapi.domain.user.controller;
 
 import com.solvemeup.smucoreapi.domain.user.dto.response.MyProfileResponseDTO;
+import com.solvemeup.smucoreapi.domain.user.dto.response.NicknameAvailabilityResponseDTO;
 import com.solvemeup.smucoreapi.domain.user.dto.response.UserProfileResponseDTO;
 import com.solvemeup.smucoreapi.domain.user.service.UserService;
 import com.solvemeup.smucoreapi.global.auth.AuthUserId;
 import com.solvemeup.smucoreapi.global.dto.PageResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,5 +46,11 @@ public class UserController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(PageResponse.from(userService.getRanking(pageable)));
+    }
+
+    @GetMapping("/nickname/availability")
+    public ResponseEntity<NicknameAvailabilityResponseDTO> checkNicknameAvailability(@RequestParam @Size(min = 4, max = 20) String nickname) {
+        boolean available = userService.checkNicknameAvailability(nickname);
+        return ResponseEntity.ok(NicknameAvailabilityResponseDTO.of(nickname, available));
     }
 }

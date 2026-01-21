@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .userService(customOAuth2UserService)
                 )
                 .defaultSuccessUrl(loginSuccessRedirectUri, true)
+                .failureHandler(failureHandler)
         );
 
         http.logout(logout -> logout

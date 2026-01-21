@@ -20,7 +20,7 @@ import static com.solvemeup.smucoreapi.domain.user.enums.Status.*;
 @Entity
 @Table(
         name = "users",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"oauth2Provider", "oauth2ProviderId"}),
+        uniqueConstraints = @UniqueConstraint(columnNames = {"oauth2_provider", "oauth2_provider_id"}),
         indexes = {
                 @Index(name = "idx_users_rating_id", columnList = "rating, id")
         }

@@ -7,9 +7,9 @@ import com.solvemeup.smucoreapi.domain.user.enums.Status;
 
 import java.time.Instant;
 
-public record MyProfileResponseDTO(
+public record MyProfileResponse(
         Long id,
-        OAuth2Provider oAuth2Provider,
+        OAuth2Provider oauth2Provider,
         String email,
         String nickname,
         String profileImageUrl,
@@ -21,8 +21,8 @@ public record MyProfileResponseDTO(
         Status status,
         long rank
 ) {
-    public static MyProfileResponseDTO from(User user, long rank) {
-        return new MyProfileResponseDTO(
+    public static MyProfileResponse from(User user, long rank) {
+        return new MyProfileResponse(
                 user.getId(),
                 user.getOauth2Provider(),
                 user.getEmail(),

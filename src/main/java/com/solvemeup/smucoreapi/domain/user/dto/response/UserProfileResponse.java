@@ -6,9 +6,9 @@ import com.solvemeup.smucoreapi.domain.user.enums.Role;
 import com.solvemeup.smucoreapi.domain.user.enums.Status;
 import com.solvemeup.smucoreapi.domain.user.repository.projection.UserRankingProjection;
 
-public record UserProfileResponseDTO(
+public record UserProfileResponse(
         Long id,
-        OAuth2Provider oAuth2Provider,
+        OAuth2Provider oauth2Provider,
         String nickname,
         String profileImageUrl,
         String githubUrl,
@@ -18,8 +18,8 @@ public record UserProfileResponseDTO(
         Status status,
         long rank
 ) {
-    public static UserProfileResponseDTO from(User user, long rank) {
-        return new UserProfileResponseDTO(
+    public static UserProfileResponse from(User user, long rank) {
+        return new UserProfileResponse(
                 user.getId(),
                 user.getOauth2Provider(),
                 user.getNickname(),
@@ -33,10 +33,10 @@ public record UserProfileResponseDTO(
         );
     }
 
-    public static UserProfileResponseDTO from(UserRankingProjection p) {
-        return new UserProfileResponseDTO(
+    public static UserProfileResponse from(UserRankingProjection p) {
+        return new UserProfileResponse(
                 p.getId(),
-                p.getOAuth2Provider(),
+                p.getOauth2Provider(),
                 p.getNickname(),
                 p.getProfileImageUrl(),
                 p.getGithubUrl(),

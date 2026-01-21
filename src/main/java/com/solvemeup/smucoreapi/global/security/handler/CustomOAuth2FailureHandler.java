@@ -27,7 +27,7 @@ public class CustomOAuth2FailureHandler implements AuthenticationFailureHandler 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        ErrorResponse body = ErrorResponse.of(errorCode, request.getRequestURI());
+        ErrorResponse body = ErrorResponse.of(request.getRequestURI(), errorCode);
         response.getWriter().write(objectMapper.writeValueAsString(body));
     }
 

@@ -17,7 +17,7 @@ public record ErrorResponse(
         );
     }
 
-    public static ErrorResponse of(ErrorCode errorCode, String path) {
+    public static ErrorResponse of(String path, ErrorCode errorCode) {
         return of(path, errorCode, errorCode.getDefaultMessage());
     }
 }

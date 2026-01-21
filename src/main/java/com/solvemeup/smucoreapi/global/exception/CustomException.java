@@ -16,14 +16,4 @@ public abstract class CustomException extends RuntimeException {
         super(message);
         this.errorCode = errorCode;
     }
-
-    protected CustomException(ErrorCode errorCode, Throwable cause) {
-        super(errorCode.getDefaultMessage(), cause);
-        this.errorCode = errorCode;
-    }
-
-    protected CustomException(ErrorCode errorCode, String message, Throwable cause) {
-        super(message, cause);
-        this.errorCode = errorCode;
-    }
 }

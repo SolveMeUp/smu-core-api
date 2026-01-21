@@ -1,20 +1,24 @@
-package com.solvemeup.smucoreapi.global.oauth2.service;
+package com.solvemeup.smucoreapi.global.security.oauth2.service;
 
 import com.solvemeup.smucoreapi.domain.user.entity.User;
-import com.solvemeup.smucoreapi.domain.user.exception.NicknameGenerationFailedException;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
 import com.solvemeup.smucoreapi.domain.user.util.NicknameGenerator;
-import com.solvemeup.smucoreapi.global.oauth2.principal.CustomOAuth2User;
-import com.solvemeup.smucoreapi.global.oauth2.response.OAuth2Response;
-import com.solvemeup.smucoreapi.global.oauth2.response.OAuth2ResponseFactory;
+import com.solvemeup.smucoreapi.global.security.oauth2.principal.CustomOAuth2User;
+import com.solvemeup.smucoreapi.global.security.oauth2.response.OAuth2Response;
+import com.solvemeup.smucoreapi.global.security.oauth2.response.OAuth2ResponseFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.solvemeup.smucoreapi.domain.user.enums.Status.*;
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.INACTIVE_USER;
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.NICKNAME_GENERATION_FAILED;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +27,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
     private final NicknameGenerator nicknameGenerator;
 
-    private static final int RETRY_LIMIT = 5;
+    private static final int RETRY_LIMIT = 3;
 
     @Override
     @Transactional
@@ -36,11 +40,21 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         );
 
         User user = userRepository
-                .findByOauth2ProviderAndOauth2ProviderId(
+                .findIncludingDeletedAndAnonymizedByOauth2ProviderAndOauth2ProviderId(
                         response.getOAuth2Provider(),
                         response.getOAuth2ProviderId()
                 )
-                .orElseGet(() -> createUserWithUniqueNickname(response));
+                .orElse(null);
+
+        if (user == null) {
+            user = createUserWithUniqueNickname(response);
+        } else if (user.getStatus() == INACTIVE) {
+            throw new OAuth2AuthenticationException(new OAuth2Error(INACTIVE_USER.name()));
+        } else if (user.getStatus() == DELETED) {
+            user.restoreDeletedUser();
+        } else if (user.getStatus() == ANONYMIZED) {
+            user.activateAnonymizedUser();
+        }
 
         return new CustomOAuth2User(user.getId(), user.getRole());
     }
@@ -60,20 +74,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 );
             } catch (DataIntegrityViolationException e) {
                 lastException = e;
-
-                User existing = userRepository
-                        .findByOauth2ProviderAndOauth2ProviderId(
-                                response.getOAuth2Provider(),
-                                response.getOAuth2ProviderId()
-                        )
-                        .orElse(null);
-
-                if (existing != null) {
-                    return existing;
-                }
             }
         }
 
-        throw new NicknameGenerationFailedException(lastException);
+        throw new OAuth2AuthenticationException(new OAuth2Error(NICKNAME_GENERATION_FAILED.name()), lastException);
     }
 }

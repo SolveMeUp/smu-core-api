@@ -1,4 +1,4 @@
-package com.solvemeup.smucoreapi.global.oauth2.principal;
+package com.solvemeup.smucoreapi.global.security.oauth2.principal;
 
 import com.solvemeup.smucoreapi.domain.user.enums.Role;
 import lombok.Getter;
@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public final class CustomOAuth2User implements OAuth2User, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final Long userId;

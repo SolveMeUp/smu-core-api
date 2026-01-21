@@ -70,7 +70,7 @@ public class SecurityConfig {
         http.logout(logout -> logout
                 .logoutUrl("/api/auth/logout")
                 .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
+                .deleteCookies("SESSION")
                 .logoutSuccessHandler((request, response, authentication) -> response.setStatus(200))
         );
 

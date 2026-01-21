@@ -15,7 +15,7 @@ import org.hibernate.annotations.SQLRestriction;
 import java.time.Instant;
 
 import static com.solvemeup.smucoreapi.domain.user.enums.Role.USER;
-import static com.solvemeup.smucoreapi.domain.user.enums.Status.ACTIVE;
+import static com.solvemeup.smucoreapi.domain.user.enums.Status.*;
 
 @Entity
 @Table(
@@ -25,7 +25,7 @@ import static com.solvemeup.smucoreapi.domain.user.enums.Status.ACTIVE;
                 @Index(name = "idx_users_rating_id", columnList = "rating, id")
         }
 )
-@SQLRestriction("status <> 'DELETED'")
+@SQLRestriction("status NOT IN ('DELETED', 'ANONYMIZED')")
 @SQLDelete(sql = "UPDATE users SET status='DELETED', deleted_at=NOW() WHERE id=? AND version=?")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -118,5 +118,23 @@ public class User {
 
         String trimmed = value.trim();
         return trimmed.isBlank() ? null : trimmed;
+    }
+
+    public void restoreDeletedUser() {
+        if (this.status != DELETED) {
+            return;
+        }
+
+        this.status = ACTIVE;
+        this.deletedAt = null;
+    }
+
+    public void activateAnonymizedUser() {
+        if (this.status != ANONYMIZED) {
+            return;
+        }
+
+        this.status = ACTIVE;
+        this.deletedAt = null;
     }
 }

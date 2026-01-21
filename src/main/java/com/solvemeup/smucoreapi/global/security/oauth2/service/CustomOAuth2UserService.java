@@ -40,7 +40,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         );
 
         User user = userRepository
-                .findIncludingDeletedAndAnonymizedByOauth2ProviderAndOauth2ProviderId(
+                .findIncludingDeletedByOauth2ProviderAndOauth2ProviderId(
                         response.getOAuth2Provider(),
                         response.getOAuth2ProviderId()
                 )

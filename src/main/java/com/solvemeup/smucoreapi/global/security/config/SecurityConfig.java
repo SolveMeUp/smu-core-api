@@ -1,6 +1,9 @@
-package com.solvemeup.smucoreapi.global.config;
+package com.solvemeup.smucoreapi.global.security.config;
 
-import com.solvemeup.smucoreapi.global.oauth2.service.CustomOAuth2UserService;
+import com.solvemeup.smucoreapi.global.security.handler.CustomAccessDeniedHandler;
+import com.solvemeup.smucoreapi.global.security.handler.CustomAuthenticationEntryPoint;
+import com.solvemeup.smucoreapi.global.security.handler.CustomOAuth2FailureHandler;
+import com.solvemeup.smucoreapi.global.security.oauth2.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +28,9 @@ public class SecurityConfig {
     @Value("${app.oauth2.login-success-redirect-uri}")
     private String loginSuccessRedirectUri;
 
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomOAuth2FailureHandler failureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
@@ -41,11 +47,16 @@ public class SecurityConfig {
 
                 .requestMatchers("/api/users/me").authenticated()
                 .requestMatchers("/api/users/me/**").authenticated()
-
                 .requestMatchers("/api/users/**").permitAll()
+
                 .requestMatchers("/api/posts/**").permitAll()
 
                 .anyRequest().authenticated()
+        );
+
+        http.exceptionHandling(ex -> ex
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler)
         );
 
         http.oauth2Login(oauth2 -> oauth2

@@ -13,7 +13,15 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByOauth2ProviderAndOauth2ProviderId(OAuth2Provider oauth2Provider, String oauth2ProviderId);
+    @Query(value = """
+            SELECT *
+            FROM users
+            WHERE oauth2_provider = :oauth2Provider AND oauth2_provider_id = :oauth2ProviderId
+            """, nativeQuery = true)
+    Optional<User> findIncludingDeletedAndAnonymizedByOauth2ProviderAndOauth2ProviderId(
+            @Param("oauth2Provider") OAuth2Provider oauth2Provider,
+            @Param("oauth2ProviderId") String oauth2ProviderId
+    );
 
     boolean existsByNickname(String nickname);
 

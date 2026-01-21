@@ -6,7 +6,7 @@ public interface UserRankingProjection {
 
     Long getId();
 
-    OAuth2Provider getOAuth2Provider();
+    OAuth2Provider getOauth2Provider();
 
     String getNickname();
 

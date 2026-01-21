@@ -18,17 +18,24 @@ public interface UserRepository extends JpaRepository<User, Long> {
             FROM users
             WHERE oauth2_provider = :oauth2Provider AND oauth2_provider_id = :oauth2ProviderId
             """, nativeQuery = true)
-    Optional<User> findIncludingDeletedAndAnonymizedByOauth2ProviderAndOauth2ProviderId(
+    Optional<User> findIncludingDeletedByOauth2ProviderAndOauth2ProviderId(
             @Param("oauth2Provider") OAuth2Provider oauth2Provider,
             @Param("oauth2ProviderId") String oauth2ProviderId
     );
 
-    boolean existsByNickname(String nickname);
+    @Query(value = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM users
+                WHERE nickname = :nickname
+            )
+            """, nativeQuery = true)
+    Long existsIncludingDeletedByNickname(@Param("nickname") String nickname);
 
     @Query(value = """
             SELECT
                 u.id AS id,
-                u.oauth2_provider AS oAuth2Provider,
+                u.oauth2_provider AS oauth2Provider,
                 u.nickname AS nickname,
                 u.profile_image_url AS profileImageUrl,
                 u.github_url AS githubUrl,
@@ -38,22 +45,22 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 u.status AS status,
                 RANK() OVER (ORDER BY u.rating DESC) AS `rank`
             FROM users u
-            WHERE u.status != 'DELETED'
+            WHERE u.status NOT IN ('DELETED', 'ANONYMIZED')
             ORDER BY u.rating DESC, u.id
             """,
             countQuery = """
                     SELECT COUNT(*)
                     FROM users u
-                    WHERE u.status != 'DELETED'
+                    WHERE u.status NOT IN ('DELETED', 'ANONYMIZED')
                     """,
             nativeQuery = true
     )
-    Page<UserRankingProjection> findRankingWithRank(Pageable pageable);
+    Page<UserRankingProjection> findUserRankingPageWithRank(Pageable pageable);
 
     @Query(value = """
             SELECT COUNT(*) + 1
             FROM users u
-            WHERE u.status != 'DELETED' AND u.rating > :rating
+            WHERE u.status NOT IN ('DELETED', 'ANONYMIZED') AND u.rating > :rating
             """, nativeQuery = true)
-    long calcCompetitionRankByRating(@Param("rating") int rating);
+    long calculateCompetitionRankByRating(@Param("rating") int rating);
 }

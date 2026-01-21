@@ -62,7 +62,17 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
+        if (nickname.equals(user.getNickname())) {
+            return;
+        }
+
         user.updateNickname(nickname);
+
+        try {
+            userRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new NicknameAlreadyExistsException(nickname);
+        }
     }
 
     @Transactional

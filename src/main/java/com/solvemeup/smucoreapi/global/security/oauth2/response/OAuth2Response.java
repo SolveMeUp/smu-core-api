@@ -1,4 +1,4 @@
-package com.solvemeup.smucoreapi.global.oauth2.response;
+package com.solvemeup.smucoreapi.global.security.oauth2.response;
 
 import com.solvemeup.smucoreapi.domain.user.enums.OAuth2Provider;
 

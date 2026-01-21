@@ -1,7 +1,7 @@
-package com.solvemeup.smucoreapi.global.oauth2.response;
+package com.solvemeup.smucoreapi.global.security.oauth2.response;
 
 import com.solvemeup.smucoreapi.domain.user.enums.OAuth2Provider;
-import com.solvemeup.smucoreapi.global.oauth2.exception.OAuth2AttributeMissingException;
+import com.solvemeup.smucoreapi.global.security.oauth2.exception.OAuth2AttributeMissingException;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 

@@ -1,4 +1,4 @@
-package com.solvemeup.smucoreapi.global.dto;
+package com.solvemeup.smucoreapi.global.api.dto.response;
 
 import org.springframework.data.domain.Page;
 

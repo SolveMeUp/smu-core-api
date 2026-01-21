@@ -1,4 +1,4 @@
-package com.solvemeup.smucoreapi.global.auth;
+package com.solvemeup.smucoreapi.global.security.annotation;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 

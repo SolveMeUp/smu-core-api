@@ -1,16 +1,17 @@
 package com.solvemeup.smucoreapi.domain.user.service;
 
-import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyEmailRequestDTO;
-import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyGithubUrlRequestDTO;
-import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyNicknameRequestDTO;
-import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyTechblogUrlRequestDTO;
+import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyEmailRequest;
+import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyGithubUrlRequest;
+import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyNicknameRequest;
+import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyTechblogUrlRequest;
 import com.solvemeup.smucoreapi.domain.user.exception.NicknameAlreadyExistsException;
 import com.solvemeup.smucoreapi.domain.user.exception.UserNotFoundException;
-import com.solvemeup.smucoreapi.domain.user.dto.response.MyProfileResponseDTO;
-import com.solvemeup.smucoreapi.domain.user.dto.response.UserProfileResponseDTO;
+import com.solvemeup.smucoreapi.domain.user.dto.response.MyProfileResponse;
+import com.solvemeup.smucoreapi.domain.user.dto.response.UserProfileResponse;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,11 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public MyProfileResponseDTO getMyProfile(Long userId) {
+    public MyProfileResponse getMyProfile(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        return MyProfileResponseDTO.from(user, userRepository.calcCompetitionRankByRating(user.getRating()));
+        return MyProfileResponse.from(user, userRepository.calculateCompetitionRankByRating(user.getRating()));
     }
 
     @Transactional
@@ -38,13 +39,12 @@ public class UserService {
         userRepository.delete(user);
     }
 
-
     @Transactional
-    public void updateMyEmail(Long userId, UpdateMyEmailRequestDTO requestDTO) {
+    public void updateMyEmail(Long userId, UpdateMyEmailRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        user.updateEmail(requestDTO.email());
+        user.updateEmail(request.email());
     }
 
     @Transactional
@@ -56,12 +56,8 @@ public class UserService {
     }
 
     @Transactional
-    public void updateMyNickname(Long userId, UpdateMyNicknameRequestDTO requestDTO) {
-        String nickname = requestDTO.nickname().trim();
-
-        if (userRepository.existsByNickname(nickname)) {
-            throw new NicknameAlreadyExistsException();
-        }
+    public void updateMyNickname(Long userId, UpdateMyNicknameRequest request) {
+        String nickname = request.nickname().trim();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -70,7 +66,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateMyGithubUrl(Long userId, UpdateMyGithubUrlRequestDTO request) {
+    public void updateMyGithubUrl(Long userId, UpdateMyGithubUrlRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -86,7 +82,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateMyTechblogUrl(Long userId, UpdateMyTechblogUrlRequestDTO request) {
+    public void updateMyTechblogUrl(Long userId, UpdateMyTechblogUrlRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -101,19 +97,19 @@ public class UserService {
         user.updateTechblogUrl(null);
     }
 
-    public Page<UserProfileResponseDTO> getRanking(Pageable pageable) {
-        return userRepository.findRankingWithRank(pageable)
-                .map(UserProfileResponseDTO::from);
+    public Page<UserProfileResponse> getRanking(Pageable pageable) {
+        return userRepository.findUserRankingPageWithRank(pageable)
+                .map(UserProfileResponse::from);
     }
 
-    public UserProfileResponseDTO getUser(Long userId) {
+    public UserProfileResponse getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        return UserProfileResponseDTO.from(user, userRepository.calcCompetitionRankByRating(user.getRating()));
+        return UserProfileResponse.from(user, userRepository.calculateCompetitionRankByRating(user.getRating()));
     }
 
-    public boolean checkNicknameAvailability(String nickname) {
-        return !userRepository.existsByNickname(nickname);
+    public boolean isNicknameDuplicated(String nickname) {
+        return userRepository.existsIncludingDeletedByNickname(nickname) == 1;
     }
 }

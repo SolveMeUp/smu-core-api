@@ -1,8 +1,8 @@
-package com.solvemeup.smucoreapi.global.security.oauth2.response;
+package com.solvemeup.smucoreapi.domain.auth.oauth2.response;
 
-import com.solvemeup.smucoreapi.domain.user.enums.OAuth2Provider;
-import com.solvemeup.smucoreapi.global.security.oauth2.exception.InvalidOAuth2RegistrationIdException;
-import com.solvemeup.smucoreapi.global.security.oauth2.exception.UnsupportedOAuth2ProviderException;
+import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
+import com.solvemeup.smucoreapi.domain.auth.oauth2.exception.InvalidOAuth2RegistrationIdException;
+import com.solvemeup.smucoreapi.domain.auth.oauth2.exception.UnsupportedOAuth2ProviderException;
 
 import java.util.Map;
 
@@ -13,9 +13,9 @@ public final class OAuth2ResponseFactory {
     }
 
     public static OAuth2Response of(String registrationId, Map<String, Object> attributes) {
-        OAuth2Provider provider = parseProvider(registrationId);
+        OAuth2Provider oauth2Provider = parseProvider(registrationId);
 
-        return switch (provider) {
+        return switch (oauth2Provider) {
             case GITHUB -> new GithubResponse(attributes);
             default -> throw new UnsupportedOAuth2ProviderException(registrationId);
         };

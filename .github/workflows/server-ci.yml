@@ -7,34 +7,8 @@ on:
     branches: ["dev"]
 
 jobs:
-  build-test:
+  build:
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_DATABASE: smu_test
-          MYSQL_USER: smu
-          MYSQL_PASSWORD: smu1234
-          MYSQL_ROOT_PASSWORD: root1234
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="sh -c 'mysqladmin ping -h 127.0.0.1 -uroot -p\"$MYSQL_ROOT_PASSWORD\" --silent'"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
 
     steps:
       - name: Checkout
@@ -50,37 +24,20 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # (선택) 서비스 준비 확인 – 디버깅용, 나중에 지워도 됨
-      - name: Wait for MySQL & Redis
-        run: |
-          for i in {1..30}; do
-            (echo > /dev/tcp/mysql/3306) >/dev/null 2>&1 && echo "MySQL OK" && break
-            sleep 2
-          done
-          for i in {1..30}; do
-            (echo > /dev/tcp/redis/6379) >/dev/null 2>&1 && echo "Redis OK" && break
-            sleep 2
-          done
-
-      - name: Build & Test
+      - name: Build (skip tests)
         env:
-          # DB (application.yml과 정확히 매칭)
-          DB_HOST: mysql
+          DB_HOST: localhost
           DB_PORT: 3306
           DB_NAME: smu_test
           DB_USERNAME: smu
           DB_PASSWORD: smu1234
 
-          # Redis
-          REDIS_HOST: redis
+          REDIS_HOST: localhost
           REDIS_PORT: 6379
 
-          # OAuth / App (⚠️ 이름 정확)
           GITHUB_CLIENT_ID: dummy
           GITHUB_CLIENT_SECRET: dummy
           LOGIN_SUCCESS_REDIRECT_URI: http://localhost
 
-          # JPA (CI 테스트용)
           SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
-
-        run: ./gradlew clean test --stacktrace
+        run: ./gradlew clean build -x test

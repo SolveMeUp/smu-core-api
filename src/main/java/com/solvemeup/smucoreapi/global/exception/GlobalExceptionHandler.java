@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -18,59 +19,35 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         ErrorCode errorCode = e.getErrorCode();
-        String path = request.getRequestURI();
 
         return ResponseEntity
                 .status(errorCode.getStatus())
-                .body(ErrorResponse.of(path, errorCode, e.getMessage()));
+                .body(ErrorResponse.of(request.getRequestURI(), errorCode, e.getMessage()));
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({
+            MethodArgumentNotValidException.class,
+            ConstraintViolationException.class,
+            MissingServletRequestParameterException.class,
+            MethodArgumentTypeMismatchException.class
+    })
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
-            MethodArgumentNotValidException e,
+            Exception e,
             HttpServletRequest request
     ) {
-        String path = request.getRequestURI();
-
         return ResponseEntity
                 .status(ErrorCode.COMMON_BAD_REQUEST.getStatus())
-                .body(ErrorResponse.of(path, ErrorCode.COMMON_BAD_REQUEST));
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
-            ConstraintViolationException e,
-            HttpServletRequest request
-    ) {
-        String path = request.getRequestURI();
-
-        return ResponseEntity
-                .status(ErrorCode.COMMON_BAD_REQUEST.getStatus())
-                .body(ErrorResponse.of(path, ErrorCode.COMMON_BAD_REQUEST));
-    }
-
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ErrorResponse> handleMissingRequestParam(
-            MissingServletRequestParameterException e,
-            HttpServletRequest request
-    ) {
-        String path = request.getRequestURI();
-
-        return ResponseEntity
-                .status(ErrorCode.COMMON_BAD_REQUEST.getStatus())
-                .body(ErrorResponse.of(path, ErrorCode.COMMON_BAD_REQUEST));
+                .body(ErrorResponse.of(request.getRequestURI(), ErrorCode.COMMON_BAD_REQUEST));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleMethodNotSupported(
+    public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(
             HttpRequestMethodNotSupportedException e,
             HttpServletRequest request
     ) {
-        String path = request.getRequestURI();
-
         return ResponseEntity
                 .status(ErrorCode.COMMON_METHOD_NOT_ALLOWED.getStatus())
-                .body(ErrorResponse.of(path, ErrorCode.COMMON_METHOD_NOT_ALLOWED));
+                .body(ErrorResponse.of(request.getRequestURI(), ErrorCode.COMMON_METHOD_NOT_ALLOWED));
     }
 
     @ExceptionHandler(Exception.class)
@@ -78,10 +55,8 @@ public class GlobalExceptionHandler {
             Exception e,
             HttpServletRequest request
     ) {
-        String path = request.getRequestURI();
-
         return ResponseEntity
                 .status(ErrorCode.COMMON_INTERNAL_ERROR.getStatus())
-                .body(ErrorResponse.of(path, ErrorCode.COMMON_INTERNAL_ERROR));
+                .body(ErrorResponse.of(request.getRequestURI(), ErrorCode.COMMON_INTERNAL_ERROR));
     }
 }

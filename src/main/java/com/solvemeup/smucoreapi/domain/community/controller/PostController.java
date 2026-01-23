@@ -1,5 +1,6 @@
 package com.solvemeup.smucoreapi.domain.community.controller;
 
+import com.solvemeup.smucoreapi.domain.auth.oauth2.principal.CustomOAuth2User;
 import com.solvemeup.smucoreapi.domain.community.dto.request.CommentCreateRequest;
 import com.solvemeup.smucoreapi.domain.community.dto.request.PostCreateRequest;
 import com.solvemeup.smucoreapi.domain.community.dto.request.PostUpdateRequest;
@@ -10,8 +11,7 @@ import com.solvemeup.smucoreapi.domain.community.dto.response.PostResponse;
 import com.solvemeup.smucoreapi.domain.community.enums.ReactionType;
 import com.solvemeup.smucoreapi.domain.community.service.CommentService;
 import com.solvemeup.smucoreapi.domain.community.service.PostService;
-import com.solvemeup.smucoreapi.global.oauth2.annotation.AuthUser;
-import com.solvemeup.smucoreapi.global.oauth2.session.UserSession;
+import com.solvemeup.smucoreapi.global.security.annotation.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -44,46 +44,46 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<PostResponse> createPost(
-            @AuthUser UserSession userSession,
+            @AuthUser CustomOAuth2User user,
             @Valid @RequestBody PostCreateRequest request
     ) {
-        PostResponse response = postService.create(userSession.id(), request);
+        PostResponse response = postService.create(user.getUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{postId}")
     public ResponseEntity<PostResponse> updatePost(
-            @AuthUser UserSession userSession,
+            @AuthUser CustomOAuth2User user,
             @PathVariable Long postId,
             @Valid @RequestBody PostUpdateRequest request
     ) {
-        return ResponseEntity.ok(postService.update(userSession.id(), postId, request));
+        return ResponseEntity.ok(postService.update(user.getUserId(), postId, request));
     }
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
-            @AuthUser UserSession userSession,
+            @AuthUser CustomOAuth2User user,
             @PathVariable Long postId
     ) {
-        postService.delete(userSession.id(), postId);
+        postService.delete(user.getUserId(), postId);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{postId}/likes")
     public ResponseEntity<Void> likePost(
-            @AuthUser UserSession userSession,
+            @AuthUser CustomOAuth2User user,
             @PathVariable Long postId
     ) {
-        postService.react(userSession.id(), postId, ReactionType.LIKE);
+        postService.react(user.getUserId(), postId, ReactionType.LIKE);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{postId}/dislikes")
     public ResponseEntity<Void> dislikePost(
-            @AuthUser UserSession userSession,
+            @AuthUser CustomOAuth2User user,
             @PathVariable Long postId
     ) {
-        postService.react(userSession.id(), postId, ReactionType.DISLIKE);
+        postService.react(user.getUserId(), postId, ReactionType.DISLIKE);
         return ResponseEntity.ok().build();
     }
 
@@ -93,39 +93,39 @@ public class PostController {
 
     @PostMapping("/{postId}/comments")
     public ResponseEntity<CommentResponse> createComment(
-            @AuthUser UserSession userSession,
+            @AuthUser CustomOAuth2User user,
             @PathVariable Long postId,
             @Valid @RequestBody CommentCreateRequest request
     ) {
-        CommentResponse response = commentService.create(userSession.id(), postId, request);
+        CommentResponse response = commentService.create(user.getUserId(), postId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{postId}/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
-            @AuthUser UserSession userSession,
+            @AuthUser CustomOAuth2User user,
             @PathVariable Long postId,
             @PathVariable Long commentId
     ) {
-        commentService.delete(userSession.id(), postId, commentId);
+        commentService.delete(user.getUserId(), postId, commentId);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/comments/{commentId}/likes")
     public ResponseEntity<Void> likeComment(
-            @AuthUser UserSession userSession,
+            @AuthUser CustomOAuth2User user,
             @PathVariable Long commentId
     ) {
-        commentService.react(userSession.id(), commentId, ReactionType.LIKE);
+        commentService.react(user.getUserId(), commentId, ReactionType.LIKE);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/comments/{commentId}/dislikes")
     public ResponseEntity<Void> dislikeComment(
-            @AuthUser UserSession userSession,
+            @AuthUser CustomOAuth2User user,
             @PathVariable Long commentId
     ) {
-        commentService.react(userSession.id(), commentId, ReactionType.DISLIKE);
+        commentService.react(user.getUserId(), commentId, ReactionType.DISLIKE);
         return ResponseEntity.ok().build();
     }
 }

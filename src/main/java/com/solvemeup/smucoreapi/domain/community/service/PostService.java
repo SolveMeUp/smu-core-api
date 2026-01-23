@@ -14,7 +14,7 @@ import com.solvemeup.smucoreapi.domain.community.repository.CommentRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostReactionRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostRepository;
 import com.solvemeup.smucoreapi.domain.community.exception.*;
-import com.solvemeup.smucoreapi.domain.user.entity.User;
+import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -57,7 +57,7 @@ public class PostService {
 
     @Transactional
     public PostResponse create(Long userId, PostCreateRequest request) {
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Post post = Post.create(user, request.title(), request.content());
@@ -97,7 +97,7 @@ public class PostService {
         Post post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
 
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Optional<PostReaction> existingReaction = postReactionRepository.findByPostIdAndUserId(postId, userId);

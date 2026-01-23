@@ -1,6 +1,6 @@
-package com.solvemeup.smucoreapi.global.security.oauth2.principal;
+package com.solvemeup.smucoreapi.domain.auth.oauth2.principal;
 
-import com.solvemeup.smucoreapi.domain.user.enums.Role;
+import com.solvemeup.smucoreapi.domain.user.entity.Role;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,10 +22,11 @@ public final class CustomOAuth2User implements OAuth2User, Serializable {
 
     private final Long userId;
     private final Role role;
+    private final LoginEvent loginEvent;
 
     @Override
     public Map<String, Object> getAttributes() {
-        return Map.of();
+        return Map.of("userId", userId, "role", role, "loginEvent", loginEvent);
     }
 
     @Override

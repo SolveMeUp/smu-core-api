@@ -42,8 +42,8 @@ public record UserProfileResponse(
                 p.getGithubUrl(),
                 p.getTechblogUrl(),
                 p.getRating(),
-                Role.valueOf(p.getRole()),
-                Status.valueOf(p.getStatus()),
+                p.getRole(),
+                p.getStatus(),
                 p.getRank()
         );
     }

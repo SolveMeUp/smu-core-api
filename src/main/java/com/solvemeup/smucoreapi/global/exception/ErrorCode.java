@@ -11,14 +11,14 @@ public enum ErrorCode {
     // =========================
     AUTH_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH-001", "로그인이 필요합니다."),
     AUTH_FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH-002", "접근 권한이 없습니다."),
-    AUTH_INVALID_SESSION(HttpStatus.UNAUTHORIZED, "AUTH-003", "세션이 유효하지 않습니다."),
+    AUTH_BLOCKED_USER(HttpStatus.FORBIDDEN, "AUTH-003", "차단된 계정입니다."),
 
     // =========================
     // OAuth2
     // =========================
     OAUTH2_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "OAUTH2-001", "OAuth2 로그인에 실패했습니다."),
-    OAUTH2_UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST, "OAUTH2-002", "지원하지 않는 OAuth2 Provider 입니다."),
-    OAUTH2_INVALID_REGISTRATION_ID(HttpStatus.BAD_REQUEST, "OAUTH2-003", "잘못된 OAuth2 registrationId 입니다."),
+    OAUTH2_INVALID_REGISTRATION_ID(HttpStatus.BAD_REQUEST, "OAUTH2-002", "잘못된 OAuth2 registrationId 입니다."),
+    OAUTH2_UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST, "OAUTH2-003", "지원하지 않는 OAuth2 Provider 입니다."),
     OAUTH2_MISSING_ATTRIBUTE(HttpStatus.INTERNAL_SERVER_ERROR, "OAUTH2-004", "OAuth2 응답 필수 값이 누락되었습니다."),
 
     // =========================
@@ -28,7 +28,6 @@ public enum ErrorCode {
     NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "USER-002", "닉네임 생성에 실패했습니다."),
     INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "USER-003", "닉네임이 올바르지 않습니다."),
     NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-004", "중복된 닉네임입니다."),
-    INACTIVE_USER(HttpStatus.FORBIDDEN, "USER-005", "차단된 회원입니다."),
 
     // =========================
     // Common

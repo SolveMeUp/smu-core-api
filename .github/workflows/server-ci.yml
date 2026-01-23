@@ -21,10 +21,10 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h localhost -u root -p$MYSQL_ROOT_PASSWORD"
+          --health-cmd="sh -c 'mysqladmin ping -h 127.0.0.1 -uroot -p\"$MYSQL_ROOT_PASSWORD\" --silent'"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
 
       redis:
         image: redis:7-alpine
@@ -34,7 +34,7 @@ jobs:
           --health-cmd="redis-cli ping"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
 
     steps:
       - name: Checkout
@@ -50,24 +50,37 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
+      # (선택) 서비스 준비 확인 – 디버깅용, 나중에 지워도 됨
+      - name: Wait for MySQL & Redis
+        run: |
+          for i in {1..30}; do
+            (echo > /dev/tcp/mysql/3306) >/dev/null 2>&1 && echo "MySQL OK" && break
+            sleep 2
+          done
+          for i in {1..30}; do
+            (echo > /dev/tcp/redis/6379) >/dev/null 2>&1 && echo "Redis OK" && break
+            sleep 2
+          done
+
       - name: Build & Test
         env:
-          # application.yml이 요구하는 DB_* 형태로 맞춰줌
-          DB_HOST: localhost
+          # DB (application.yml과 정확히 매칭)
+          DB_HOST: mysql
           DB_PORT: 3306
           DB_NAME: smu_test
           DB_USERNAME: smu
           DB_PASSWORD: smu1234
 
-          # redis placeholders 채움
-          REDIS_HOST: localhost
+          # Redis
+          REDIS_HOST: redis
           REDIS_PORT: 6379
 
-          # oauth/app placeholders 더미값(테스트에서 실제 인증 안 하면 더미로 충분)
+          # OAuth / App (⚠️ 이름 정확)
           GITHUB_CLIENT_ID: dummy
           GITHUB_CLIENT_SECRET: dummy
-          LOGIN_REDIRECT_URI: http://localhost
+          LOGIN_SUCCESS_REDIRECT_URI: http://localhost
 
-          # JPA 테스트용
+          # JPA (CI 테스트용)
           SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
-        run: ./gradlew clean test
+
+        run: ./gradlew clean test --stacktrace

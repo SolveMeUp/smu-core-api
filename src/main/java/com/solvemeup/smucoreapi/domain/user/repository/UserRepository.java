@@ -1,8 +1,7 @@
 package com.solvemeup.smucoreapi.domain.user.repository;
 
-import com.solvemeup.smucoreapi.domain.user.entity.User;
-import com.solvemeup.smucoreapi.domain.user.enums.OAuth2Provider;
-import com.solvemeup.smucoreapi.domain.user.repository.projection.UserRankingProjection;
+import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
+import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,14 +10,14 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     @Query(value = """
             SELECT *
             FROM users
             WHERE oauth2_provider = :oauth2Provider AND oauth2_provider_id = :oauth2ProviderId
             """, nativeQuery = true)
-    Optional<User> findIncludingDeletedByOauth2ProviderAndOauth2ProviderId(
+    Optional<UserEntity> findIncludingDeletedByOauth2ProviderAndOauth2ProviderId(
             @Param("oauth2Provider") OAuth2Provider oauth2Provider,
             @Param("oauth2ProviderId") String oauth2ProviderId
     );

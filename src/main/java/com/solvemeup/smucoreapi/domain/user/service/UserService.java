@@ -8,7 +8,7 @@ import com.solvemeup.smucoreapi.domain.user.exception.NicknameAlreadyExistsExcep
 import com.solvemeup.smucoreapi.domain.user.exception.UserNotFoundException;
 import com.solvemeup.smucoreapi.domain.user.dto.response.MyProfileResponse;
 import com.solvemeup.smucoreapi.domain.user.dto.response.UserProfileResponse;
-import com.solvemeup.smucoreapi.domain.user.entity.User;
+import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,7 +25,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     public MyProfileResponse getMyProfile(Long userId) {
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         return MyProfileResponse.from(user, userRepository.calculateCompetitionRankByRating(user.getRating()));
@@ -33,7 +33,7 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Long userId) {
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         userRepository.delete(user);
@@ -41,7 +41,7 @@ public class UserService {
 
     @Transactional
     public void updateMyEmail(Long userId, UpdateMyEmailRequest request) {
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         user.updateEmail(request.email());
@@ -49,7 +49,7 @@ public class UserService {
 
     @Transactional
     public void deleteMyEmail(Long userId) {
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         user.updateEmail(null);
@@ -59,7 +59,7 @@ public class UserService {
     public void updateMyNickname(Long userId, UpdateMyNicknameRequest request) {
         String nickname = request.nickname().trim();
 
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (nickname.equals(user.getNickname())) {
@@ -77,7 +77,7 @@ public class UserService {
 
     @Transactional
     public void updateMyGithubUrl(Long userId, UpdateMyGithubUrlRequest request) {
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         user.updateGithubUrl(request.githubUrl());
@@ -85,7 +85,7 @@ public class UserService {
 
     @Transactional
     public void deleteMyGithubUrl(Long userId) {
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         user.updateGithubUrl(null);
@@ -93,7 +93,7 @@ public class UserService {
 
     @Transactional
     public void updateMyTechblogUrl(Long userId, UpdateMyTechblogUrlRequest request) {
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         user.updateTechblogUrl(request.techblogUrl());
@@ -101,7 +101,7 @@ public class UserService {
 
     @Transactional
     public void deleteMyTechblogUrl(Long userId) {
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         user.updateTechblogUrl(null);
@@ -113,7 +113,7 @@ public class UserService {
     }
 
     public UserProfileResponse getUserProfile(Long userId) {
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         return UserProfileResponse.from(user, userRepository.calculateCompetitionRankByRating(user.getRating()));

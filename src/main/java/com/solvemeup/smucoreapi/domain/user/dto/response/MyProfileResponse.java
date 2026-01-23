@@ -1,9 +1,9 @@
 package com.solvemeup.smucoreapi.domain.user.dto.response;
 
-import com.solvemeup.smucoreapi.domain.user.entity.User;
-import com.solvemeup.smucoreapi.domain.user.enums.OAuth2Provider;
-import com.solvemeup.smucoreapi.domain.user.enums.Role;
-import com.solvemeup.smucoreapi.domain.user.enums.Status;
+import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
+import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
+import com.solvemeup.smucoreapi.domain.user.entity.Role;
+import com.solvemeup.smucoreapi.domain.user.entity.Status;
 
 import java.time.Instant;
 
@@ -21,7 +21,7 @@ public record MyProfileResponse(
         Status status,
         long rank
 ) {
-    public static MyProfileResponse from(User user, long rank) {
+    public static MyProfileResponse from(UserEntity user, long rank) {
         return new MyProfileResponse(
                 user.getId(),
                 user.getOauth2Provider(),

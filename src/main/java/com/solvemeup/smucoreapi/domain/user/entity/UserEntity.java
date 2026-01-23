@@ -1,8 +1,5 @@
 package com.solvemeup.smucoreapi.domain.user.entity;
 
-import com.solvemeup.smucoreapi.domain.user.enums.OAuth2Provider;
-import com.solvemeup.smucoreapi.domain.user.enums.Role;
-import com.solvemeup.smucoreapi.domain.user.enums.Status;
 import com.solvemeup.smucoreapi.domain.user.exception.InvalidNicknameException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -14,8 +11,8 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
 
-import static com.solvemeup.smucoreapi.domain.user.enums.Role.USER;
-import static com.solvemeup.smucoreapi.domain.user.enums.Status.*;
+import static com.solvemeup.smucoreapi.domain.user.entity.Role.USER;
+import static com.solvemeup.smucoreapi.domain.user.entity.Status.*;
 
 @Entity
 @Table(
@@ -29,7 +26,7 @@ import static com.solvemeup.smucoreapi.domain.user.enums.Status.*;
 @SQLDelete(sql = "UPDATE users SET status='DELETED', deleted_at=NOW() WHERE id=? AND version=?")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
+public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,16 +74,14 @@ public class User {
     @Column(nullable = false)
     private int version;
 
-    public static User createUser(OAuth2Provider oauth2Provider,
-                                  String oauth2ProviderId,
-                                  String nickname,
-                                  String profileImageUrl
+    public static UserEntity createUser(OAuth2Provider oauth2Provider,
+                                        String oauth2ProviderId,
+                                        String nickname
     ) {
-        User user = new User();
+        UserEntity user = new UserEntity();
         user.oauth2Provider = oauth2Provider;
         user.oauth2ProviderId = oauth2ProviderId;
         user.nickname = nickname;
-        user.profileImageUrl = profileImageUrl;
         user.role = USER;
         user.status = ACTIVE;
         user.rating = 0;

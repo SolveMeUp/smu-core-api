@@ -1,9 +1,7 @@
 package com.solvemeup.smucoreapi.global.security.config;
 
-import com.solvemeup.smucoreapi.global.security.handler.CustomAccessDeniedHandler;
-import com.solvemeup.smucoreapi.global.security.handler.CustomAuthenticationEntryPoint;
-import com.solvemeup.smucoreapi.global.security.handler.CustomOAuth2FailureHandler;
-import com.solvemeup.smucoreapi.global.security.oauth2.service.CustomOAuth2UserService;
+import com.solvemeup.smucoreapi.domain.auth.oauth2.service.CustomOAuth2UserService;
+import com.solvemeup.smucoreapi.global.security.handler.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,13 +23,13 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins}")
     private List<String> corsOrigins;
 
-    @Value("${app.oauth2.login-success-redirect-uri}")
-    private String loginSuccessRedirectUri;
-
-    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-    private final CustomAccessDeniedHandler accessDeniedHandler;
-    private final CustomOAuth2FailureHandler failureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOAuth2LoginSuccessHandler customOAuth2LoginSuccessHandler;
+    private final CustomOAuth2LoginFailureHandler customOAuth2LoginFailureHandler;
+    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
+
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
@@ -40,12 +38,21 @@ public class SecurityConfig {
 
         http.cors(Customizer.withDefaults());
 
+        http.exceptionHandling(ex -> ex
+                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                .accessDeniedHandler(customAccessDeniedHandler)
+        );
+
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index.html").permitAll()
+                .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
                 .requestMatchers("/oauth2/**", "/login/**", "/error").permitAll()
+                .requestMatchers("/api/dev/**").permitAll()
+
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                .requestMatchers("/api/users/me").authenticated()
+                .requestMatchers("/api/auth/logout").permitAll()
+                .requestMatchers("/api/auth/**").authenticated()
+
                 .requestMatchers("/api/users/me/**").authenticated()
                 .requestMatchers("/api/users/**").permitAll()
 
@@ -54,24 +61,19 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
         );
 
-        http.exceptionHandling(ex -> ex
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler)
-        );
-
         http.oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo -> userInfo
                         .userService(customOAuth2UserService)
                 )
-                .defaultSuccessUrl(loginSuccessRedirectUri, true)
-                .failureHandler(failureHandler)
+                .successHandler(customOAuth2LoginSuccessHandler)
+                .failureHandler(customOAuth2LoginFailureHandler)
         );
 
         http.logout(logout -> logout
                 .logoutUrl("/api/auth/logout")
                 .invalidateHttpSession(true)
                 .deleteCookies("SESSION")
-                .logoutSuccessHandler((request, response, authentication) -> response.setStatus(200))
+                .logoutSuccessHandler(customLogoutSuccessHandler)
         );
 
         return http.build();

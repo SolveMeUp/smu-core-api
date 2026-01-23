@@ -1,6 +1,6 @@
 package com.solvemeup.smucoreapi.domain.community.entity;
 
-import com.solvemeup.smucoreapi.domain.user.entity.User;
+import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,7 +27,7 @@ public class Post extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private UserEntity user;
 
     @Column(nullable = false, length = 200)
     private String title;
@@ -53,7 +53,7 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReaction> reactions = new ArrayList<>();
 
-    public static Post create(User user, String title, String content) {
+    public static Post create(UserEntity user, String title, String content) {
         Post post = new Post();
         post.user = user;
         post.title = title;

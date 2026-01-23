@@ -4,9 +4,9 @@ import com.solvemeup.smucoreapi.global.exception.CustomException;
 
 import static com.solvemeup.smucoreapi.global.exception.ErrorCode.*;
 
-public class UserNotFoundException extends CustomException {
+public class InvalidNicknameException extends CustomException {
 
-    public UserNotFoundException(Long userId) {
-        super(USER_NOT_FOUND, "User not found: userId=" + userId);
+    public InvalidNicknameException() {
+        super(INVALID_NICKNAME);
     }
 }

@@ -3,12 +3,21 @@ package com.solvemeup.smucoreapi.global.exception;
 import java.time.Instant;
 
 public record ErrorResponse(
-        int status,
         String path,
+        String code,
         String message,
         Instant timestamp
 ) {
-    public static ErrorResponse of(int status, String path, String message) {
-        return new ErrorResponse(status, path, message, Instant.now());
+    public static ErrorResponse of(String path, ErrorCode errorCode, String message) {
+        return new ErrorResponse(
+                path,
+                errorCode.getCode(),
+                message,
+                Instant.now()
+        );
+    }
+
+    public static ErrorResponse of(String path, ErrorCode errorCode) {
+        return of(path, errorCode, errorCode.getDefaultMessage());
     }
 }

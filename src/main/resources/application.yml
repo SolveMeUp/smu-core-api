@@ -32,4 +32,4 @@ app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}
   oauth2:
-    login-success-redirect-uri: ${LOGIN_SUCCESS_REDIRECT_URI}
+    login-redirect-uri: ${LOGIN_REDIRECT_URI}

@@ -15,24 +15,29 @@ import java.io.IOException;
 public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Value("${app.oauth2.login-redirect-uri}")
-    private String loginRedirectUri;
+    private String defaultRedirectUri;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        String redirectUri = request.getParameter("redirect_uri");
+        if (redirectUri == null || redirectUri.isBlank()) {
+            redirectUri = defaultRedirectUri;
+        }
+
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof CustomOAuth2User customOAuth2User)) {
-            response.sendRedirect(loginRedirectUri);
+            response.sendRedirect(redirectUri);
             return;
         }
 
-        String redirectUri = UriComponentsBuilder
-                .fromUriString(loginRedirectUri)
+        String finalRedirectUri = UriComponentsBuilder
+                .fromUriString(redirectUri)
                 .queryParam("auth", "success")
                 .queryParam("event", customOAuth2User.getLoginEvent().name())
                 .build()
                 .encode()
                 .toUriString();
 
-        response.sendRedirect(redirectUri);
+        response.sendRedirect(finalRedirectUri);
     }
 }

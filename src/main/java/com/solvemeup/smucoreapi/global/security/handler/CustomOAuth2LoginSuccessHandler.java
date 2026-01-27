@@ -3,6 +3,7 @@ package com.solvemeup.smucoreapi.global.security.handler;
 import com.solvemeup.smucoreapi.domain.auth.oauth2.principal.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -11,6 +12,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
@@ -19,10 +21,10 @@ public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHan
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        String redirectUri = request.getParameter("state");
-        if (redirectUri == null || redirectUri.isBlank()) {
-            redirectUri = defaultRedirectUri;
-        }
+        String referer = request.getHeader("Referer");
+        String redirectUri = (referer != null && !referer.isBlank()) ? referer : defaultRedirectUri;
+
+        log.info("Redirecting to: {}", redirectUri);
 
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof CustomOAuth2User customOAuth2User)) {

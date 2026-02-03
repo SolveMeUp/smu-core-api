@@ -1,7 +1,6 @@
 package com.solvemeup.smucoreapi.domain.user.repository;
 
-import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
-import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
+import com.solvemeup.smucoreapi.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

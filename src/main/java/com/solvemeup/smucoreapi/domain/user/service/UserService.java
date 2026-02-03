@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserInternalRepository userInternalRepository;
 
     public MyProfileResponse getMyProfile(Long userId) {
         UserEntity user = userRepository.findById(userId)
@@ -131,6 +132,6 @@ public class UserService {
      * <p>삭제되었거나 익명화된 사용자도 포함하여 검사한다.
      */
     public boolean isNicknameDuplicated(String nickname) {
-        return userRepository.existsIncludingDeletedByNickname(nickname) == 1;
+        return userInternalRepository.existsIncludingDeletedByNickname(nickname);
     }
 }

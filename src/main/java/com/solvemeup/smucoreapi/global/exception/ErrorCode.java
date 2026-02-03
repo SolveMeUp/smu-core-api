@@ -30,6 +30,16 @@ public enum ErrorCode {
     NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-004", "중복된 닉네임입니다."),
 
     // =========================
+    // Problem
+    // =========================
+    PROBLEM_NOT_FOUND(HttpStatus.NOT_FOUND, "PROBLEM-001", "해당 문제를 찾을 수 없습니다."),
+
+    // =========================
+    // SUBMISSION
+    // =========================
+    JUDGE_NOT_FOUND(HttpStatus.NOT_FOUND, "JUDGE-001", "해당 저지를 찾을 수 없습니다."),
+
+    // =========================
     // Common
     // =========================
     COMMON_BAD_REQUEST(HttpStatus.BAD_REQUEST, "COMMON-001", "잘못된 요청입니다."),

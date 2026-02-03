@@ -67,7 +67,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         try {
-            OAuth2User oAuth2User = super.loadUser(userRequest);
+            OAuth2Response response = parseOAuth2Response(userRequest);
 
             User user = userInternalRepository
                     .findIncludingDeletedByOauth2ProviderAndOauth2ProviderId(
@@ -78,18 +78,24 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             if (user == null) {
                 user = createUserWithUniqueNickname(response);
-                return new CustomOAuth2User(user.getId(), user.getRole(), SIGNED_UP);
-            } else if (user.getStatus() == BLOCKED) {
-                throw new BlockedUserException(user.getId());
-            } else if (user.getStatus() == DELETED) {
-                user.restoreDeletedUser();
-                return new CustomOAuth2User(user.getId(), user.getRole(), RESTORED_FROM_DELETED);
-            } else if (user.getStatus() == ANONYMIZED) {
-                user.activateAnonymizedUser();
-                return new CustomOAuth2User(user.getId(), user.getRole(), RESTORED_FROM_ANONYMIZED);
+                return buildCustomOAuth2User(user, SIGNED_UP);
             }
 
-            return new CustomOAuth2User(user.getId(), user.getRole(), NONE);
+            if (user.getStatus() == BLOCKED) {
+                throw new BlockedUserException();
+            }
+
+            if (user.getStatus() == DELETED) {
+                user.restoreFromDeleted();
+                return buildCustomOAuth2User(user, RESTORED_FROM_DELETED);
+            }
+
+            if (user.getStatus() == ANONYMIZED) {
+                user.restoreFromAnonymized();
+                return buildCustomOAuth2User(user, RESTORED_FROM_ANONYMIZED);
+            }
+
+            return buildCustomOAuth2User(user, NONE);
         } catch (InvalidOAuth2RegistrationIdException e) {
             throw wrapOAuth2AuthenticationException(OAUTH2_INVALID_REGISTRATION_ID, e);
         } catch (UnsupportedOAuth2ProviderException e) {
@@ -103,7 +109,48 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
     }
 
-    private UserEntity createUserWithUniqueNickname(OAuth2Response response) {
+    /**
+     * OAuth2 공급자 응답을 파싱하여 {@link OAuth2Response}로 변환한다.
+     *
+     * <p>Spring Security의 기본 OAuth2UserService를 통해
+     * 사용자 attributes를 로드한 뒤,
+     * 공급자별 응답 객체로 변환한다.
+     */
+    private OAuth2Response parseOAuth2Response(OAuth2UserRequest userRequest) {
+        OAuth2User oAuth2User = super.loadUser(userRequest);
+
+        log.debug("OAuth2 registrationId={}", userRequest.getClientRegistration().getRegistrationId());
+        log.debug("OAuth2 attributes keys={}", oAuth2User.getAttributes().keySet());
+
+        return OAuth2ResponseFactory.of(
+                userRequest.getClientRegistration().getRegistrationId(),
+                oAuth2User.getAttributes()
+        );
+    }
+
+    /**
+     * 사용자 정보와 로그인 이벤트를 기반으로
+     * {@link CustomOAuth2User}를 생성한다.
+     */
+    private CustomOAuth2User buildCustomOAuth2User(User user, LoginEvent event) {
+        log.debug(
+                "OAuth2 login result: userId={}, event={}, status={}",
+                user.getId(),
+                event,
+                user.getStatus()
+        );
+
+        return new CustomOAuth2User(user.getId(), user.getRole(), event);
+    }
+
+    /**
+     * 랜덤 닉네임을 부여하여 신규 사용자를 생성한다.
+     *
+     * <p>닉네임 중복이 발생할 경우 최대 {@value #RETRY_LIMIT}회까지 재시도한다.
+     *
+     * @throws NicknameGenerationFailedException 주어진 시도 횟수 내에 유니크한 닉네임을 생성하지 못한 경우
+     */
+    private User createUserWithUniqueNickname(OAuth2Response response) {
         DataIntegrityViolationException lastException = null;
 
         for (int attempt = 1; attempt <= RETRY_LIMIT; attempt++) {

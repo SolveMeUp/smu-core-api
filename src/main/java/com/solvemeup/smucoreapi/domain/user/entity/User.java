@@ -123,21 +123,38 @@ public class User extends SoftDeleteEntity {
         return trimmed.isBlank() ? null : trimmed;
     }
 
-    public void restoreDeletedUser() {
+    /**
+     * 사용자가 차단(BLOCKED) 상태인지 여부를 반환한다.
+     */
+    public boolean isBlocked() {
+        return this.status == BLOCKED;
+    }
+
+    /**
+     * 탈퇴(DELETED) 상태의 사용자를 복구한다.
+     *
+     * <p>DELETED 상태가 아닐 경우 아무 동작도 하지 않는다.
+     */
+    public void restoreFromDeleted() {
         if (this.status != DELETED) {
             return;
         }
 
         this.status = ACTIVE;
-        this.deletedAt = null;
+        super.restore();
     }
 
-    public void activateAnonymizedUser() {
+    /**
+     * 익명화(ANONYMIZED)된 사용자를 다시 활성화한다.
+     *
+     * <p>ANONYMIZED 상태가 아닐 경우 아무 동작도 하지 않는다.
+     */
+    public void restoreFromAnonymized() {
         if (this.status != ANONYMIZED) {
             return;
         }
 
         this.status = ACTIVE;
-        this.deletedAt = null;
+        super.restore();
     }
 }

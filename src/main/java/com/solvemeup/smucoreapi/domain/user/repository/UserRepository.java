@@ -1,35 +1,21 @@
 package com.solvemeup.smucoreapi.domain.user.repository;
 
-import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
-import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
+import com.solvemeup.smucoreapi.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
-
-public interface UserRepository extends JpaRepository<UserEntity, Long> {
-
-    @Query(value = """
-            SELECT *
-            FROM users
-            WHERE oauth2_provider = :oauth2Provider AND oauth2_provider_id = :oauth2ProviderId
-            """, nativeQuery = true)
-    Optional<UserEntity> findIncludingDeletedByOauth2ProviderAndOauth2ProviderId(
-            @Param("oauth2Provider") OAuth2Provider oauth2Provider,
-            @Param("oauth2ProviderId") String oauth2ProviderId
-    );
-
-    @Query(value = """
-            SELECT EXISTS (
-                SELECT 1
-                FROM users
-                WHERE nickname = :nickname
-            )
-            """, nativeQuery = true)
-    Long existsIncludingDeletedByNickname(@Param("nickname") String nickname);
+/**
+ * 서비스에 노출되는 사용자 조회 전용 리포지토리.
+ *
+ * <p>ACTIVE, BLOCKED 상태의 사용자만 조회 대상이며,
+ * 탈퇴(DELETED) 및 익명화(ANONYMIZED) 사용자는 제외한다.
+ *
+ * <p>랭킹 조회 시 {@code rank} 값은 전체 사용자 기준의 순위를 의미한다.
+ */
+public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = """
             SELECT

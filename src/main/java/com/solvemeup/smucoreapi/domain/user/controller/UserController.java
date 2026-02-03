@@ -35,8 +35,8 @@ public class UserController {
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<Void> deleteUser(@AuthUserId Long userId) {
-        userService.deleteUser(userId);
+    public ResponseEntity<Void> softDeleteUser(@AuthUserId Long userId) {
+        userService.softDeleteUser(userId);
         return ResponseEntity.ok().build();
     }
 
@@ -91,8 +91,9 @@ public class UserController {
     }
 
     @GetMapping("/ranking")
-    public ResponseEntity<PageResponse<UserProfileResponse>> getRanking(@RequestParam(defaultValue = "0") @Min(0) @Max(100000) int page,
-                                                                        @RequestParam(defaultValue = "100") @Min(10) @Max(100) int size
+    public ResponseEntity<PageResponse<UserProfileResponse>> getRanking(
+            @RequestParam(defaultValue = "0") @Min(0) @Max(100000) int page,
+            @RequestParam(defaultValue = "100") @Min(10) @Max(100) int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(PageResponse.from(userService.getRanking(pageable)));

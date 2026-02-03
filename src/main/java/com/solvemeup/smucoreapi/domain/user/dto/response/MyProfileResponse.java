@@ -1,11 +1,11 @@
 package com.solvemeup.smucoreapi.domain.user.dto.response;
 
-import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
+import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
 import com.solvemeup.smucoreapi.domain.user.entity.Role;
 import com.solvemeup.smucoreapi.domain.user.entity.Status;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record MyProfileResponse(
         Long id,
@@ -17,11 +17,12 @@ public record MyProfileResponse(
         String techblogUrl,
         int rating,
         Role role,
-        Instant createdAt,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
         Status status,
         long rank
 ) {
-    public static MyProfileResponse from(UserEntity user, long rank) {
+    public static MyProfileResponse from(User user, long rank) {
         return new MyProfileResponse(
                 user.getId(),
                 user.getOauth2Provider(),
@@ -33,6 +34,7 @@ public record MyProfileResponse(
                 user.getRating(),
                 user.getRole(),
                 user.getCreatedAt(),
+                user.getUpdatedAt(),
                 user.getStatus(),
                 rank
         );

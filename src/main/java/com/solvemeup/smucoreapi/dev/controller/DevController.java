@@ -3,20 +3,25 @@ package com.solvemeup.smucoreapi.dev.controller;
 import com.solvemeup.smucoreapi.domain.auth.oauth2.principal.CustomOAuth2User;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
+import com.solvemeup.smucoreapi.global.exception.ErrorCode;
+import com.solvemeup.smucoreapi.global.exception.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 import static com.solvemeup.smucoreapi.domain.auth.oauth2.principal.LoginEvent.*;
 
@@ -50,38 +55,83 @@ public class DevController {
     private final UserReader userReader;
 
     @PostMapping("/login")
-    public ResponseEntity<Void> devLogin(@RequestParam Long userId, HttpServletRequest request) {
-        User user = userReader.getUser(userId);
-        if (user.isBlocked()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<?> devLogin(@RequestParam Long userId, HttpServletRequest request) {
+        HttpSession existingSession = request.getSession(false);
+        if (existingSession != null) {
+            Object ctx = existingSession.getAttribute(
+                    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY
+            );
+
+            if (ctx instanceof SecurityContext securityContext) {
+                Authentication authentication = securityContext.getAuthentication();
+
+                if (authentication != null
+                        && authentication.isAuthenticated()
+                        && authentication.getPrincipal() instanceof CustomOAuth2User currentUser) {
+
+                    Long currentUserId = currentUser.getUserId();
+
+                    if (currentUserId.equals(userId)) {
+                        log.info("[DEV] already logged in as same user. userId={}", userId);
+                        return ResponseEntity.ok(
+                                Map.of("message", "already logged in")
+                        );
+                    }
+
+                    log.info("[DEV] switch login {} -> {}", currentUserId, userId);
+                    existingSession.invalidate();
+                }
+            }
         }
 
-        CustomOAuth2User principal = new CustomOAuth2User(user.getId(), user.getRole(), NONE);
+        User user = userReader.getUser(userId);
+        if (user.isBlocked()) {
+            return ResponseEntity
+                    .status(ErrorCode.AUTH_BLOCKED_USER.getStatus())
+                    .body(ErrorResponse.of(request.getRequestURI(), ErrorCode.AUTH_BLOCKED_USER));
+        }
 
-        var auth = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
-        var context = SecurityContextHolder.createEmptyContext();
+        CustomOAuth2User principal =
+                new CustomOAuth2User(user.getId(), user.getRole(), NONE);
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                principal, null, principal.getAuthorities()
+        );
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(auth);
         SecurityContextHolder.setContext(context);
 
-        log.debug("[DEV] SecurityContext authentication={}", SecurityContextHolder.getContext().getAuthentication());
+        HttpSession newSession = request.getSession(true);
+        newSession.setAttribute(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                context
+        );
 
-        HttpSession session = request.getSession(true);
-        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
-
-        log.info("[DEV] login as userId={}", userId);
-        return ResponseEntity.ok().build();
+        log.info("[DEV] login success. userId={}", userId);
+        return ResponseEntity.ok(
+                Map.of("message", "login success")
+        );
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> devLogout(HttpServletRequest request) {
+    public ResponseEntity<?> devLogout(HttpServletRequest request) {
         SecurityContextHolder.clearContext();
 
         HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
+
+        if (session == null) {
+            log.info("[DEV] logout requested but no active session");
+            return ResponseEntity.ok(
+                    Map.of("message", "already logged out")
+            );
         }
 
-        log.info("[DEV] logout");
-        return ResponseEntity.ok().build();
+        session.invalidate();
+        log.info("[DEV] logout success");
+
+        return ResponseEntity.ok(
+                Map.of("message", "logout success")
+        );
     }
 }

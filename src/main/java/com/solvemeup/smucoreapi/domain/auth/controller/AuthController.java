@@ -13,6 +13,6 @@ public class AuthController {
 
     @GetMapping("/me")
     public MyAuthResponse getMyAuth(@AuthUser CustomOAuth2User user) {
-        return new MyAuthResponse(user.getUserId(), user.getRole());
+        return new MyAuthResponse(user.getUserId(), user.getRole(), user.getLoginEvent());
     }
 }

@@ -6,9 +6,11 @@ import com.solvemeup.smucoreapi.domain.auth.oauth2.exception.InvalidOAuth2Regist
 import com.solvemeup.smucoreapi.domain.auth.oauth2.exception.OAuth2AttributeMissingException;
 import com.solvemeup.smucoreapi.domain.auth.oauth2.exception.UnsupportedOAuth2ProviderException;
 import com.solvemeup.smucoreapi.domain.auth.oauth2.principal.CustomOAuth2User;
+import com.solvemeup.smucoreapi.domain.auth.oauth2.principal.LoginEvent;
 import com.solvemeup.smucoreapi.domain.auth.oauth2.response.OAuth2Response;
 import com.solvemeup.smucoreapi.domain.auth.oauth2.response.OAuth2ResponseFactory;
-import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
+import com.solvemeup.smucoreapi.domain.user.entity.User;
+import com.solvemeup.smucoreapi.domain.user.repository.UserInternalRepository;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
 import com.solvemeup.smucoreapi.domain.user.util.NicknameGenerator;
 import com.solvemeup.smucoreapi.global.exception.ErrorCode;
@@ -158,7 +160,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 log.debug("Nickname generation attempt {}", attempt);
 
                 return userRepository.save(
-                        UserEntity.createUser(
+                        User.createUser(
                                 response.getOAuth2Provider(),
                                 response.getOAuth2ProviderId(),
                                 nicknameGenerator.generate()

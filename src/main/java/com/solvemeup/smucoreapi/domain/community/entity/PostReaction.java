@@ -1,7 +1,7 @@
 package com.solvemeup.smucoreapi.domain.community.entity;
 
 import com.solvemeup.smucoreapi.domain.community.enums.ReactionType;
-import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
+import com.solvemeup.smucoreapi.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -35,7 +35,7 @@ public class PostReaction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -45,7 +45,7 @@ public class PostReaction {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public static PostReaction create(Post post, UserEntity user, ReactionType reactionType) {
+    public static PostReaction create(Post post, User user, ReactionType reactionType) {
         PostReaction reaction = new PostReaction();
         reaction.post = post;
         reaction.user = user;

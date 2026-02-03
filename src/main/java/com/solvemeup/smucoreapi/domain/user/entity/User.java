@@ -1,15 +1,13 @@
 package com.solvemeup.smucoreapi.domain.user.entity;
 
 import com.solvemeup.smucoreapi.domain.user.exception.InvalidNicknameException;
+import com.solvemeup.smucoreapi.global.entity.SoftDeleteEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-
-import java.time.Instant;
 
 import static com.solvemeup.smucoreapi.domain.user.entity.Role.USER;
 import static com.solvemeup.smucoreapi.domain.user.entity.Status.*;
@@ -82,11 +80,11 @@ public class User extends SoftDeleteEntity {
     @Column(nullable = false)
     private int version;
 
-    public static UserEntity createUser(OAuth2Provider oauth2Provider,
-                                        String oauth2ProviderId,
-                                        String nickname
+    public static User createUser(OAuth2Provider oauth2Provider,
+                                  String oauth2ProviderId,
+                                  String nickname
     ) {
-        UserEntity user = new UserEntity();
+        User user = new User();
         user.oauth2Provider = oauth2Provider;
         user.oauth2ProviderId = oauth2ProviderId;
         user.nickname = nickname;

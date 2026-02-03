@@ -2,6 +2,7 @@ package com.solvemeup.smucoreapi.global.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -19,6 +21,8 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         ErrorCode errorCode = e.getErrorCode();
+
+        log.warn("CustomException: code={}, path={}", errorCode.getCode(), request.getRequestURI());
 
         return ResponseEntity
                 .status(errorCode.getStatus())
@@ -55,6 +59,8 @@ public class GlobalExceptionHandler {
             Exception e,
             HttpServletRequest request
     ) {
+        log.error("Unhandled exception at {}", request.getRequestURI(), e);
+
         return ResponseEntity
                 .status(ErrorCode.COMMON_INTERNAL_ERROR.getStatus())
                 .body(ErrorResponse.of(request.getRequestURI(), ErrorCode.COMMON_INTERNAL_ERROR));

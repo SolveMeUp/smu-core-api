@@ -4,8 +4,7 @@ import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyEmailRequest;
 import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyGithubUrlRequest;
 import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyNicknameRequest;
 import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyTechblogUrlRequest;
-import com.solvemeup.smucoreapi.domain.user.dto.response.MyProfileResponse;
-import com.solvemeup.smucoreapi.domain.user.dto.response.UserProfileResponse;
+import com.solvemeup.smucoreapi.domain.user.dto.response.*;
 import com.solvemeup.smucoreapi.domain.user.service.UserService;
 import com.solvemeup.smucoreapi.global.security.annotation.AuthUserId;
 import com.solvemeup.smucoreapi.global.api.dto.response.PageResponse;
@@ -41,11 +40,10 @@ public class UserController {
     }
 
     @PutMapping("/me/email")
-    public ResponseEntity<Void> updateMyEmail(@AuthUserId Long userId,
-                                              @Valid @RequestBody UpdateMyEmailRequest request
+    public ResponseEntity<UpdateMyEmailResponse> updateMyEmail(@AuthUserId Long userId,
+                                                               @Valid @RequestBody UpdateMyEmailRequest request
     ) {
-        userService.updateMyEmail(userId, request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userService.updateMyEmail(userId, request));
     }
 
     @DeleteMapping("/me/email")
@@ -55,19 +53,17 @@ public class UserController {
     }
 
     @PutMapping("/me/nickname")
-    public ResponseEntity<Void> updateMyNickname(@AuthUserId Long userId,
-                                                 @Valid @RequestBody UpdateMyNicknameRequest request
+    public ResponseEntity<UpdateMyNicknameResponse> updateMyNickname(@AuthUserId Long userId,
+                                                                     @Valid @RequestBody UpdateMyNicknameRequest request
     ) {
-        userService.updateMyNickname(userId, request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userService.updateMyNickname(userId, request));
     }
 
     @PutMapping("/me/github-url")
-    public ResponseEntity<Void> updateMyGithubUrl(@AuthUserId Long userId,
-                                                  @Valid @RequestBody UpdateMyGithubUrlRequest request
+    public ResponseEntity<UpdateMyGithubUrlResponse> updateMyGithubUrl(@AuthUserId Long userId,
+                                                                       @Valid @RequestBody UpdateMyGithubUrlRequest request
     ) {
-        userService.updateMyGithubUrl(userId, request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userService.updateMyGithubUrl(userId, request));
     }
 
     @DeleteMapping("/me/github-url")
@@ -77,11 +73,10 @@ public class UserController {
     }
 
     @PutMapping("/me/techblog-url")
-    public ResponseEntity<Void> updateMyTechblogUrl(@AuthUserId Long userId,
-                                                    @Valid @RequestBody UpdateMyTechblogUrlRequest request
+    public ResponseEntity<UpdateMyTechblogUrlResponse> updateMyTechblogUrl(@AuthUserId Long userId,
+                                                                           @Valid @RequestBody UpdateMyTechblogUrlRequest request
     ) {
-        userService.updateMyTechblogUrl(userId, request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userService.updateMyTechblogUrl(userId, request));
     }
 
     @DeleteMapping("/me/techblog-url")

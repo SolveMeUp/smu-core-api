@@ -36,8 +36,8 @@ import static com.solvemeup.smucoreapi.domain.user.entity.Status.*;
                 @Index(name = "idx_users_rating_id", columnList = "rating, id")
         }
 )
-@SQLRestriction("status NOT IN ('DELETED', 'ANONYMIZED')")
 @SQLDelete(sql = "UPDATE users SET status='DELETED', deleted_at=NOW() WHERE id=? AND version=?")
+@SQLRestriction("status NOT IN ('DELETED', 'ANONYMIZED')")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends SoftDeleteEntity {

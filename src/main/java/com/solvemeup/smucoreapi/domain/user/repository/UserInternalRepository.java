@@ -28,10 +28,10 @@ public interface UserInternalRepository extends JpaRepository<User, Long> {
             @Param("oauth2ProviderId") String oauth2ProviderId
     );
 
-    @Query(value = """
-            SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END
-            FROM users
-            WHERE nickname = :nickname
-            """, nativeQuery = true)
+    @Query("""
+                SELECT COUNT(u) > 0
+                FROM User u
+                WHERE u.nickname = :nickname
+            """)
     boolean existsIncludingDeletedByNickname(String nickname);
 }

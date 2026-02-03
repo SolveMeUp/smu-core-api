@@ -4,9 +4,8 @@ import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyEmailRequest;
 import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyGithubUrlRequest;
 import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyNicknameRequest;
 import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyTechblogUrlRequest;
+import com.solvemeup.smucoreapi.domain.user.dto.response.*;
 import com.solvemeup.smucoreapi.domain.user.exception.NicknameAlreadyExistsException;
-import com.solvemeup.smucoreapi.domain.user.dto.response.MyProfileResponse;
-import com.solvemeup.smucoreapi.domain.user.dto.response.UserProfileResponse;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
 import com.solvemeup.smucoreapi.domain.user.repository.UserInternalRepository;
@@ -45,9 +44,10 @@ public class UserService {
     }
 
     @Transactional
-    public void updateMyEmail(Long userId, UpdateMyEmailRequest request) {
+    public UpdateMyEmailResponse updateMyEmail(Long userId, UpdateMyEmailRequest request) {
         User user = userReader.getUser(userId);
         user.updateEmail(request.email());
+        return new UpdateMyEmailResponse(user.getEmail());
     }
 
     @Transactional
@@ -57,12 +57,12 @@ public class UserService {
     }
 
     @Transactional
-    public void updateMyNickname(Long userId, UpdateMyNicknameRequest request) {
+    public UpdateMyNicknameResponse updateMyNickname(Long userId, UpdateMyNicknameRequest request) {
         String nickname = request.nickname().trim();
         User user = userReader.getUser(userId);
 
         if (nickname.equals(user.getNickname())) {
-            return;
+            return new UpdateMyNicknameResponse(user.getNickname());
         }
 
         user.updateNickname(nickname);
@@ -72,12 +72,15 @@ public class UserService {
         } catch (DataIntegrityViolationException e) {
             throw new NicknameAlreadyExistsException();
         }
+
+        return new UpdateMyNicknameResponse(user.getNickname());
     }
 
     @Transactional
-    public void updateMyGithubUrl(Long userId, UpdateMyGithubUrlRequest request) {
+    public UpdateMyGithubUrlResponse updateMyGithubUrl(Long userId, UpdateMyGithubUrlRequest request) {
         User user = userReader.getUser(userId);
         user.updateGithubUrl(request.githubUrl());
+        return new UpdateMyGithubUrlResponse(user.getGithubUrl());
     }
 
     @Transactional
@@ -87,9 +90,10 @@ public class UserService {
     }
 
     @Transactional
-    public void updateMyTechblogUrl(Long userId, UpdateMyTechblogUrlRequest request) {
+    public UpdateMyTechblogUrlResponse updateMyTechblogUrl(Long userId, UpdateMyTechblogUrlRequest request) {
         User user = userReader.getUser(userId);
         user.updateTechblogUrl(request.techblogUrl());
+        return new UpdateMyTechblogUrlResponse(user.getTechblogUrl());
     }
 
     @Transactional

@@ -5,10 +5,11 @@ import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyGithubUrlRequest
 import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyNicknameRequest;
 import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyTechblogUrlRequest;
 import com.solvemeup.smucoreapi.domain.user.exception.NicknameAlreadyExistsException;
-import com.solvemeup.smucoreapi.domain.user.exception.UserNotFoundException;
 import com.solvemeup.smucoreapi.domain.user.dto.response.MyProfileResponse;
 import com.solvemeup.smucoreapi.domain.user.dto.response.UserProfileResponse;
-import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
+import com.solvemeup.smucoreapi.domain.user.entity.User;
+import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
+import com.solvemeup.smucoreapi.domain.user.repository.UserInternalRepository;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,13 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final UserReader userReader;
     private final UserRepository userRepository;
     private final UserInternalRepository userInternalRepository;
 
     public MyProfileResponse getMyProfile(Long userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+        User user = userReader.getUser(userId);
         return MyProfileResponse.from(user, userRepository.calculateCompetitionRankByRating(user.getRating()));
     }
 
@@ -39,35 +39,27 @@ public class UserService {
      * 소프트 딜리트 방식으로 처리된다.
      */
     @Transactional
-    public void deleteUser(Long userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+    public void softDeleteUser(Long userId) {
+        User user = userReader.getUser(userId);
         userRepository.delete(user);
     }
 
     @Transactional
     public void updateMyEmail(Long userId, UpdateMyEmailRequest request) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+        User user = userReader.getUser(userId);
         user.updateEmail(request.email());
     }
 
     @Transactional
     public void deleteMyEmail(Long userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+        User user = userReader.getUser(userId);
         user.updateEmail(null);
     }
 
     @Transactional
     public void updateMyNickname(Long userId, UpdateMyNicknameRequest request) {
         String nickname = request.nickname().trim();
-
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userReader.getUser(userId);
 
         if (nickname.equals(user.getNickname())) {
             return;
@@ -78,39 +70,31 @@ public class UserService {
         try {
             userRepository.flush();
         } catch (DataIntegrityViolationException e) {
-            throw new NicknameAlreadyExistsException(nickname);
+            throw new NicknameAlreadyExistsException();
         }
     }
 
     @Transactional
     public void updateMyGithubUrl(Long userId, UpdateMyGithubUrlRequest request) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+        User user = userReader.getUser(userId);
         user.updateGithubUrl(request.githubUrl());
     }
 
     @Transactional
     public void deleteMyGithubUrl(Long userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+        User user = userReader.getUser(userId);
         user.updateGithubUrl(null);
     }
 
     @Transactional
     public void updateMyTechblogUrl(Long userId, UpdateMyTechblogUrlRequest request) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+        User user = userReader.getUser(userId);
         user.updateTechblogUrl(request.techblogUrl());
     }
 
     @Transactional
     public void deleteMyTechblogUrl(Long userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+        User user = userReader.getUser(userId);
         user.updateTechblogUrl(null);
     }
 
@@ -120,9 +104,7 @@ public class UserService {
     }
 
     public UserProfileResponse getUserProfile(Long userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+        User user = userReader.getUser(userId);
         return UserProfileResponse.from(user, userRepository.calculateCompetitionRankByRating(user.getRating()));
     }
 

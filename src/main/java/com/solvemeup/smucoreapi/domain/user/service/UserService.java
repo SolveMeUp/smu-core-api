@@ -31,6 +31,12 @@ public class UserService {
         return MyProfileResponse.from(user, userRepository.calculateCompetitionRankByRating(user.getRating()));
     }
 
+    /**
+     * 사용자를 탈퇴 처리한다.
+     *
+     * <p>실제 데이터는 삭제되지 않으며
+     * 소프트 딜리트 방식으로 처리된다.
+     */
     @Transactional
     public void deleteUser(Long userId) {
         UserEntity user = userRepository.findById(userId)
@@ -119,6 +125,11 @@ public class UserService {
         return UserProfileResponse.from(user, userRepository.calculateCompetitionRankByRating(user.getRating()));
     }
 
+    /**
+     * 닉네임 중복 여부를 확인한다.
+     *
+     * <p>삭제되었거나 익명화된 사용자도 포함하여 검사한다.
+     */
     public boolean isNicknameDuplicated(String nickname) {
         return userRepository.existsIncludingDeletedByNickname(nickname) == 1;
     }

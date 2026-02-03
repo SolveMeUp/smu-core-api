@@ -14,6 +14,20 @@ import java.time.Instant;
 import static com.solvemeup.smucoreapi.domain.user.entity.Role.USER;
 import static com.solvemeup.smucoreapi.domain.user.entity.Status.*;
 
+/**
+ * 사용자 도메인 엔티티.
+ *
+ * <p>OAuth2 기반 인증 사용자를 표현하며,
+ * 소프트 딜리트와 상태 기반 접근 제어를 지원한다.
+ *
+ * <p>사용자 상태:
+ * <ul>
+ *   <li>{@code ACTIVE} : 정상 사용자</li>
+ *   <li>{@code BLOCKED} : 로그인만 제한된 사용자</li>
+ *   <li>{@code DELETED} : 탈퇴 처리된 사용자</li>
+ *   <li>{@code ANONYMIZED} : 개인정보가 제거된 사용자</li>
+ * </ul>
+ */
 @Entity
 @Table(
         name = "users",

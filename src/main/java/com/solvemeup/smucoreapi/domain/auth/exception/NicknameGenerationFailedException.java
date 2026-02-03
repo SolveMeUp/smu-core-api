@@ -2,6 +2,9 @@ package com.solvemeup.smucoreapi.domain.auth.exception;
 
 import lombok.Getter;
 
+/**
+ * 랜덤 닉네임 생성에 실패했을 때 발생하는 내부 예외.
+ */
 @Getter
 public class NicknameGenerationFailedException extends RuntimeException {
 

@@ -1,38 +1,28 @@
 package com.solvemeup.smucoreapi.global.security.handler;
 
-import com.solvemeup.smucoreapi.global.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
+/**
+ * OAuth2 로그인 실패 시 처리 핸들러.
+ *
+ * <p>OAuth2 인증 실패가 발생하면 클라이언트 콜백 URL로
+ * 실패 원인을 포함하여 리다이렉트한다.
+ */
+@Slf4j
 @Component
 public class CustomOAuth2LoginFailureHandler implements AuthenticationFailureHandler {
 
-    @Value("${app.oauth2.login-redirect-uri}")
-    private String loginRedirectUri;
-
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-        String errorCode = ErrorCode.OAUTH2_LOGIN_FAILED.getCode();
-        if (exception instanceof OAuth2AuthenticationException oAuth2Ex) {
-            errorCode = oAuth2Ex.getError().getErrorCode();
-        }
+        log.debug("OAuth2 login failed: {}", exception.getClass().getSimpleName());
 
-        String redirectUri = UriComponentsBuilder
-                .fromUriString(loginRedirectUri)
-                .queryParam("auth", "fail")
-                .queryParam("error", errorCode)
-                .build()
-                .encode()
-                .toUriString();
-
-        response.sendRedirect(redirectUri);
+        response.sendRedirect("/auth/callback?error=oauth_failed");
     }
 }

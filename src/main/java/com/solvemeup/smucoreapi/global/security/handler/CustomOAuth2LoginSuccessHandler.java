@@ -1,45 +1,28 @@
 package com.solvemeup.smucoreapi.global.security.handler;
 
-import com.solvemeup.smucoreapi.domain.auth.oauth2.principal.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
+/**
+ * OAuth2 로그인 성공 시 처리 핸들러.
+ *
+ * <p>OAuth2 인증이 성공하면 클라이언트 콜백 URL로 리다이렉트하여
+ * 이후 로그인 후 처리를 진행한다.
+ */
 @Slf4j
 @Component
 public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    @Value("${app.oauth2.login-redirect-uri}")
-    private String defaultRedirectUri;
-
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        String referer = request.getHeader("Referer");
-        String redirectUri = (referer != null && !referer.isBlank()) ? referer : defaultRedirectUri;
+        log.debug("OAuth2 login success");
 
-        log.info("Redirecting to: {}", redirectUri);
-
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof CustomOAuth2User customOAuth2User)) {
-            response.sendRedirect(redirectUri);
-            return;
-        }
-
-        String finalRedirectUri = UriComponentsBuilder
-                .fromUriString(redirectUri)
-                .queryParam("auth", "success")
-                .queryParam("event", customOAuth2User.getLoginEvent().name())
-                .build()
-                .encode()
-                .toUriString();
-
-        response.sendRedirect(finalRedirectUri);
+        response.sendRedirect("/auth/callback");
     }
 }

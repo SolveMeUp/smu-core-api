@@ -101,7 +101,7 @@ public class User extends SoftDeleteEntity {
     }
 
     public void updateNickname(String nickname) {
-        if (nickname == null || nickname.trim().isBlank()) {
+        if (normalizeNullableString(nickname) == null) {
             throw new InvalidNicknameException();
         }
 

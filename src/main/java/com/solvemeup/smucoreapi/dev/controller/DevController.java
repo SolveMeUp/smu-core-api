@@ -1,14 +1,14 @@
 package com.solvemeup.smucoreapi.dev.controller;
 
 import com.solvemeup.smucoreapi.domain.auth.oauth2.principal.CustomOAuth2User;
-import com.solvemeup.smucoreapi.domain.user.entity.UserEntity;
-import com.solvemeup.smucoreapi.domain.user.exception.UserNotFoundException;
-import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
+import com.solvemeup.smucoreapi.domain.user.entity.User;
+import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,12 +47,14 @@ import static com.solvemeup.smucoreapi.domain.auth.oauth2.principal.LoginEvent.*
 @RequiredArgsConstructor
 public class DevController {
 
-    private final UserRepository userRepository;
+    private final UserReader userReader;
 
     @PostMapping("/login")
     public ResponseEntity<Void> devLogin(@RequestParam Long userId, HttpServletRequest request) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userReader.getUser(userId);
+        if (user.isBlocked()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         CustomOAuth2User principal = new CustomOAuth2User(user.getId(), user.getRole(), NONE);
 

@@ -25,14 +25,6 @@ public class CustomOAuth2LoginFailureHandler implements AuthenticationFailureHan
             errorCode = oAuth2Ex.getError().getErrorCode();
         }
 
-        String redirectUri = UriComponentsBuilder
-                .fromUriString(loginRedirectUri)
-                .queryParam("auth", "fail")
-                .queryParam("error", errorCode)
-                .build()
-                .encode()
-                .toUriString();
-
-        response.sendRedirect(redirectUri);
+        response.sendRedirect("/auth/callback?error=oauth_failed");
     }
 }

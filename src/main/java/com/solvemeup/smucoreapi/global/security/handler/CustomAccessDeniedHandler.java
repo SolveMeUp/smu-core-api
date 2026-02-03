@@ -13,6 +13,12 @@ import java.io.IOException;
 
 import static com.solvemeup.smucoreapi.global.exception.ErrorCode.*;
 
+/**
+ * 인가 실패(권한 부족) 시 공통 처리 핸들러.
+ *
+ * <p>인증은 되었으나 접근 권한이 없는 리소스에 접근할 경우
+ * HTTP 403 응답과 표준 에러 바디를 JSON 형식으로 반환한다.
+ */
 @Component
 @RequiredArgsConstructor
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {

@@ -33,6 +33,10 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        response.getWriter().write(objectMapper.writeValueAsString(Map.of("message", "logout success")));
+        if (authentication != null) {
+            response.getWriter().write(objectMapper.writeValueAsString(Map.of("message", "logout success")));
+        } else {
+            response.getWriter().write(objectMapper.writeValueAsString(Map.of("message", "already logged out")));
+        }
     }
 }

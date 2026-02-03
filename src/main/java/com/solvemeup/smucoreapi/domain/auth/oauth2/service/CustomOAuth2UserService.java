@@ -51,6 +51,7 @@ import static com.solvemeup.smucoreapi.global.exception.ErrorCode.*;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final UserInternalRepository userInternalRepository;
     private final NicknameGenerator nicknameGenerator;
 
     private static final int RETRY_LIMIT = 3;
@@ -68,12 +69,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         try {
             OAuth2User oAuth2User = super.loadUser(userRequest);
 
-            OAuth2Response response = OAuth2ResponseFactory.of(
-                    userRequest.getClientRegistration().getRegistrationId(),
-                    oAuth2User.getAttributes()
-            );
-
-            UserEntity user = userRepository
+            User user = userInternalRepository
                     .findIncludingDeletedByOauth2ProviderAndOauth2ProviderId(
                             response.getOAuth2Provider(),
                             response.getOAuth2ProviderId()

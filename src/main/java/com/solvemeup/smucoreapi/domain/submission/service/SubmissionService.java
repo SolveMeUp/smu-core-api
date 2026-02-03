@@ -2,7 +2,8 @@ package com.solvemeup.smucoreapi.domain.submission.service;
 
 import com.solvemeup.smucoreapi.domain.problem.entity.Problem;
 import com.solvemeup.smucoreapi.domain.problem.reader.ProblemReader;
-import com.solvemeup.smucoreapi.domain.submission.dto.request.SubmissionCreateRequest;
+import com.solvemeup.smucoreapi.domain.submission.dto.request.SubmitSolutionRequest;
+import com.solvemeup.smucoreapi.domain.submission.dto.response.SubmitSolutionResponse;
 import com.solvemeup.smucoreapi.domain.submission.entity.Judge;
 import com.solvemeup.smucoreapi.domain.submission.entity.Submission;
 import com.solvemeup.smucoreapi.domain.submission.repository.JudgeRepository;
@@ -29,7 +30,7 @@ public class SubmissionService {
     private final JudgeRequestProducer judgeRequestProducer;
 
     @Transactional
-    public void submit(Long userId, Long ProblemId, SubmissionCreateRequest request) {
+    public SubmitSolutionResponse submit(Long userId, Long ProblemId, SubmitSolutionRequest request) {
         User user = userReader.getUser(userId);
         Problem problem = problemReader.getProblem(ProblemId);
 
@@ -55,5 +56,7 @@ public class SubmissionService {
         );
 
         judgeRequestProducer.send(message);
+
+        return new SubmitSolutionResponse(submission.getId());
     }
 }

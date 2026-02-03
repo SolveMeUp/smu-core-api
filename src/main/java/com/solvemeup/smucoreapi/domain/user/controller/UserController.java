@@ -35,8 +35,8 @@ public class UserController {
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<Void> deleteUser(@AuthUserId Long userId) {
-        userService.deleteUser(userId);
+    public ResponseEntity<Void> softDeleteUser(@AuthUserId Long userId) {
+        userService.softDeleteUser(userId);
         return ResponseEntity.ok().build();
     }
 

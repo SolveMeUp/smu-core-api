@@ -37,7 +37,7 @@ public enum ErrorCode {
     // =========================
     // SUBMISSION
     // =========================
-    JUDGE_NOT_FOUND(HttpStatus.NOT_FOUND, "JUDGE-001", "해당 저지를 찾을 수 없습니다."),
+    SUBMISSION_RESULT_NOT_FOUND(HttpStatus.NOT_FOUND, "JUDGE-001", "해당 저지를 찾을 수 없습니다."),
 
     // =========================
     // Common

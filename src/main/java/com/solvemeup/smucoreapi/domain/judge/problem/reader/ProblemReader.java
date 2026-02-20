@@ -1,8 +1,8 @@
-package com.solvemeup.smucoreapi.domain.problem.reader;
+package com.solvemeup.smucoreapi.domain.judge.problem.reader;
 
-import com.solvemeup.smucoreapi.domain.problem.entity.Problem;
-import com.solvemeup.smucoreapi.domain.problem.exception.ProblemNotFoundException;
-import com.solvemeup.smucoreapi.domain.problem.repository.ProblemRepository;
+import com.solvemeup.smucoreapi.domain.judge.problem.entity.Problem;
+import com.solvemeup.smucoreapi.domain.judge.problem.exception.ProblemNotFoundException;
+import com.solvemeup.smucoreapi.domain.judge.problem.repository.ProblemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

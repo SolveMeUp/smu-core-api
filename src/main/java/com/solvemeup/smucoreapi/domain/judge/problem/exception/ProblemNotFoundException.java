@@ -1,4 +1,4 @@
-package com.solvemeup.smucoreapi.domain.problem.exception;
+package com.solvemeup.smucoreapi.domain.judge.problem.exception;
 
 import com.solvemeup.smucoreapi.global.exception.CustomException;
 

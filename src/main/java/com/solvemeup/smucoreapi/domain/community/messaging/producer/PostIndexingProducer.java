@@ -1,4 +1,4 @@
-package com.solvemeup.smucoreapi.domain.community.messaging.publisher;
+package com.solvemeup.smucoreapi.domain.community.messaging.producer;
 
 import com.solvemeup.smucoreapi.domain.community.messaging.event.PostIndexEvent;
 import com.solvemeup.smucoreapi.global.messaging.config.RabbitConfig;
@@ -10,7 +10,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
-public class PostEventPublisher {
+public class PostIndexingProducer {
 
     private final RabbitTemplate rabbitTemplate;
 

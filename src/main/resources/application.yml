@@ -24,6 +24,9 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URI}
+
   rabbitmq:
     host: ${RABBITMQ_HOST}
     port: ${RABBITMQ_PORT}

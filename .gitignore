@@ -41,3 +41,6 @@ out/
 
 ### env ###
 src/main/resources/.env
+
+### docs ###
+docs/

@@ -8,6 +8,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
+    public static final String COMMUNITY_EXCHANGE = "community.exchange";
+    public static final String COMMUNITY_DLX_EXCHANGE = "community.dlx";
+    public static final String COMMUNITY_POST_ROUTING_KEY = "community.post.index";
+    public static final String COMMUNITY_DLQ_ROUTING_KEY = "community.post.dlq";
+    public static final String COMMUNITY_POST_QUEUE = "community.post.index.queue";
+    public static final String COMMUNITY_DLQ_QUEUE = "community.post.dlq.queue";
+
     public static final String SUBMISSION_EXCHANGE = "judge.exchange";
     public static final String DLX_EXCHANGE = "judge.dlx";
     public static final String RUN_EXCHANGE = "example.exchange";
@@ -123,6 +130,43 @@ public class RabbitConfig {
         return BindingBuilder.bind(exampleDeadLetterQueue())
                 .to(exampleDlxExchange())
                 .with(EXAMPLE_DLQ_ROUTING_KEY);
+    }
+
+    @Bean
+    public DirectExchange communityExchange() {
+        return new DirectExchange(COMMUNITY_EXCHANGE);
+    }
+
+    @Bean
+    public DirectExchange communityDlxExchange() {
+        return new DirectExchange(COMMUNITY_DLX_EXCHANGE);
+    }
+
+    @Bean
+    public Queue communityPostQueue() {
+        return QueueBuilder.durable(COMMUNITY_POST_QUEUE)
+                .withArgument("x-dead-letter-exchange", COMMUNITY_DLX_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", COMMUNITY_DLQ_ROUTING_KEY)
+                .build();
+    }
+
+    @Bean
+    public Binding communityPostBinding() {
+        return BindingBuilder.bind(communityPostQueue())
+                .to(communityExchange())
+                .with(COMMUNITY_POST_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue communityDlqQueue() {
+        return QueueBuilder.durable(COMMUNITY_DLQ_QUEUE).build();
+    }
+
+    @Bean
+    public Binding communityDlqBinding() {
+        return BindingBuilder.bind(communityDlqQueue())
+                .to(communityDlxExchange())
+                .with(COMMUNITY_DLQ_ROUTING_KEY);
     }
 
     @Bean

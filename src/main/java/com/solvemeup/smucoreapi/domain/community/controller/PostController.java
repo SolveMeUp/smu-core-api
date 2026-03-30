@@ -8,6 +8,8 @@ import com.solvemeup.smucoreapi.domain.community.dto.response.CommentResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PageResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PostDetailResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PostResponse;
+import com.solvemeup.smucoreapi.domain.community.dto.response.PostSearchResponse;
+import com.solvemeup.smucoreapi.domain.community.service.PostSearchService;
 import com.solvemeup.smucoreapi.domain.community.enums.ReactionType;
 import com.solvemeup.smucoreapi.domain.community.service.CommentService;
 import com.solvemeup.smucoreapi.domain.community.service.PostService;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
+    private final PostSearchService postSearchService;
     private final CommentService commentService;
 
 
@@ -35,6 +38,14 @@ public class PostController {
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return ResponseEntity.ok(postService.findAll(pageable));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<PageResponse<PostSearchResponse>> searchPosts(
+            @RequestParam String keyword,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        return ResponseEntity.ok(postSearchService.search(keyword, pageable));
     }
 
     @GetMapping("/{postId}")

@@ -10,6 +10,7 @@ import com.solvemeup.smucoreapi.domain.community.entity.Comment;
 import com.solvemeup.smucoreapi.domain.community.entity.Post;
 import com.solvemeup.smucoreapi.domain.community.entity.PostReaction;
 import com.solvemeup.smucoreapi.domain.community.enums.ReactionType;
+import com.solvemeup.smucoreapi.domain.community.messaging.event.PostIndexEvent;
 import com.solvemeup.smucoreapi.domain.community.repository.CommentRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostReactionRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostRepository;
@@ -17,6 +18,7 @@ import com.solvemeup.smucoreapi.domain.community.exception.*;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ public class PostService {
     private final PostReactionRepository postReactionRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public PageResponse<PostResponse> findAll(Pageable pageable) {
         Page<Post> posts = postRepository.findAllActive(pageable);
@@ -63,6 +66,8 @@ public class PostService {
         Post post = Post.create(user, request.title(), request.content());
         Post savedPost = postRepository.save(post);
 
+        eventPublisher.publishEvent(PostIndexEvent.index(savedPost));
+
         return PostResponse.from(savedPost);
     }
 
@@ -77,6 +82,8 @@ public class PostService {
 
         post.update(request.title(), request.content());
 
+        eventPublisher.publishEvent(PostIndexEvent.update(post));
+
         return PostResponse.from(post);
     }
 
@@ -90,6 +97,8 @@ public class PostService {
         }
 
         post.delete();
+
+        eventPublisher.publishEvent(PostIndexEvent.delete(postId));
     }
 
     @Transactional

@@ -53,6 +53,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/logout").permitAll()
                 .requestMatchers("/api/auth/**").authenticated()
 
+                // 모니터링
+                .requestMatchers("/actuator/**").permitAll()
+
                 // 개발용
                 .requestMatchers("/api/dev/**").permitAll()
 

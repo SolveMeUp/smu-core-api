@@ -35,3 +35,16 @@ spring:
         acknowledge-mode: auto
         retry:
           enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus, metrics
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true

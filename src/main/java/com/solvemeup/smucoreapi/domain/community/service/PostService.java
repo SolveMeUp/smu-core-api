@@ -15,6 +15,7 @@ import com.solvemeup.smucoreapi.domain.community.repository.CommentRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostReactionRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostRepository;
 import com.solvemeup.smucoreapi.domain.community.exception.*;
+import com.solvemeup.smucoreapi.domain.community.viewcount.ViewCountStorage;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ViewCountStorage viewCountStorage;
 
     public PageResponse<PostResponse> findAll(Pageable pageable) {
         Page<Post> posts = postRepository.findAllActive(pageable);
@@ -46,12 +48,11 @@ public class PostService {
         return PageResponse.from(postResponses);
     }
 
-    @Transactional
     public PostDetailResponse findById(Long postId) {
         Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
 
-        post.incrementViewCount();
+        viewCountStorage.increment(postId);
 
         List<CommentResponse> comments = getCommentsWithReplies(postId);
 

@@ -18,7 +18,10 @@ import com.solvemeup.smucoreapi.domain.community.exception.*;
 import com.solvemeup.smucoreapi.domain.community.viewcount.ViewCountStorage;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
+import com.solvemeup.smucoreapi.global.cache.CacheConfig;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,15 +51,18 @@ public class PostService {
         return PageResponse.from(postResponses);
     }
 
+    @Cacheable(value = CacheConfig.POST_DETAIL, key = "#postId")
     public PostDetailResponse findById(Long postId) {
         Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
 
-        viewCountStorage.increment(postId);
-
         List<CommentResponse> comments = getCommentsWithReplies(postId);
 
         return PostDetailResponse.of(post, comments);
+    }
+
+    public void incrementView(Long postId) {
+        viewCountStorage.increment(postId);
     }
 
     @Transactional
@@ -72,6 +78,7 @@ public class PostService {
         return PostResponse.from(savedPost);
     }
 
+    @CacheEvict(value = CacheConfig.POST_DETAIL, key = "#postId")
     @Transactional
     public PostResponse update(Long userId, Long postId, PostUpdateRequest request) {
         Post post = postRepository.findByIdWithUser(postId)
@@ -88,6 +95,7 @@ public class PostService {
         return PostResponse.from(post);
     }
 
+    @CacheEvict(value = CacheConfig.POST_DETAIL, key = "#postId")
     @Transactional
     public void delete(Long userId, Long postId) {
         Post post = postRepository.findByIdWithUser(postId)

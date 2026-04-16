@@ -50,7 +50,9 @@ public class PostController {
 
     @GetMapping("/{postId}")
     public ResponseEntity<PostDetailResponse> getPost(@PathVariable Long postId) {
-        return ResponseEntity.ok(postService.findById(postId));
+        PostDetailResponse response = postService.findById(postId);
+        postService.incrementView(postId);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

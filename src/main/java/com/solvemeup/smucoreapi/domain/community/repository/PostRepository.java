@@ -14,7 +14,8 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL ORDER BY p.createdAt DESC")
+    @Query(value = "SELECT p FROM Post p JOIN FETCH p.user WHERE p.deletedAt IS NULL ORDER BY p.createdAt DESC",
+           countQuery = "SELECT COUNT(p) FROM Post p WHERE p.deletedAt IS NULL")
     Page<Post> findAllActive(Pageable pageable);
 
     @Query("SELECT p FROM Post p WHERE p.id = :id AND p.deletedAt IS NULL")

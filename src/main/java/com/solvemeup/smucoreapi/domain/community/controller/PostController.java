@@ -5,6 +5,7 @@ import com.solvemeup.smucoreapi.domain.community.dto.request.CommentCreateReques
 import com.solvemeup.smucoreapi.domain.community.dto.request.PostCreateRequest;
 import com.solvemeup.smucoreapi.domain.community.dto.request.PostUpdateRequest;
 import com.solvemeup.smucoreapi.domain.community.dto.response.CommentResponse;
+import com.solvemeup.smucoreapi.domain.community.dto.response.CursorResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PageResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PostDetailResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PostResponse;
@@ -17,7 +18,6 @@ import com.solvemeup.smucoreapi.global.security.annotation.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,10 +34,11 @@ public class PostController {
 
 
     @GetMapping
-    public ResponseEntity<PageResponse<PostResponse>> getAllPosts(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    public ResponseEntity<CursorResponse<PostResponse>> getAllPosts(
+            @RequestParam(required = false) Long lastId,
+            @RequestParam(defaultValue = "20") int size
     ) {
-        return ResponseEntity.ok(postService.findAll(pageable));
+        return ResponseEntity.ok(postService.findAllByCursor(lastId, size));
     }
 
     @GetMapping("/search")

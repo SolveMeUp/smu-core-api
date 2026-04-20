@@ -14,7 +14,8 @@ import java.util.List;
         name = "posts",
         indexes = {
                 @Index(name = "idx_posts_user_id", columnList = "user_id"),
-                @Index(name = "idx_posts_created_at", columnList = "createdAt")
+                @Index(name = "idx_posts_created_at", columnList = "createdAt"),
+                @Index(name = "idx_posts_deleted_created", columnList = "deletedAt, createdAt")
         }
 )
 @Getter

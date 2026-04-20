@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,6 +18,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query(value = "SELECT p FROM Post p JOIN FETCH p.user WHERE p.deletedAt IS NULL ORDER BY p.createdAt DESC",
            countQuery = "SELECT COUNT(p) FROM Post p WHERE p.deletedAt IS NULL")
     Page<Post> findAllActive(Pageable pageable);
+
+    @Query("SELECT p FROM Post p JOIN FETCH p.user WHERE p.id < :lastId AND p.deletedAt IS NULL ORDER BY p.id DESC")
+    List<Post> findAllByCursor(@Param("lastId") Long lastId, Pageable pageable);
+
+    @Query("SELECT p FROM Post p JOIN FETCH p.user WHERE p.deletedAt IS NULL ORDER BY p.id DESC")
+    List<Post> findAllFirstPage(Pageable pageable);
 
     @Query("SELECT p FROM Post p WHERE p.id = :id AND p.deletedAt IS NULL")
     Optional<Post> findByIdAndNotDeleted(Long id);

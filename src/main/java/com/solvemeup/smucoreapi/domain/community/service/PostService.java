@@ -25,6 +25,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.solvemeup.smucoreapi.domain.community.dto.response.CursorResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +50,25 @@ public class PostService {
         Page<Post> posts = postRepository.findAllActive(pageable);
         Page<PostResponse> postResponses = posts.map(PostResponse::from);
         return PageResponse.from(postResponses);
+    }
+
+    public CursorResponse<PostResponse> findAllByCursor(Long lastId, int size) {
+        Pageable pageable = Pageable.ofSize(size + 1);
+
+        List<Post> posts = (lastId == null)
+                ? postRepository.findAllFirstPage(pageable)
+                : postRepository.findAllByCursor(lastId, pageable);
+
+        boolean hasNext = posts.size() > size;
+        List<Post> content = hasNext ? posts.subList(0, size) : posts;
+
+        List<PostResponse> responses = content.stream()
+                .map(PostResponse::from)
+                .toList();
+
+        Long nextLastId = content.isEmpty() ? null : content.get(content.size() - 1).getId();
+
+        return CursorResponse.of(responses, size, hasNext, nextLastId);
     }
 
     @Cacheable(value = CacheConfig.POST_DETAIL, key = "#postId")

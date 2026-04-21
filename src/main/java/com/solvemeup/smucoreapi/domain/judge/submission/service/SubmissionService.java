@@ -3,9 +3,11 @@ package com.solvemeup.smucoreapi.domain.judge.submission.service;
 import com.solvemeup.smucoreapi.domain.judge.problem.entity.Problem;
 import com.solvemeup.smucoreapi.domain.judge.problem.reader.ProblemReader;
 import com.solvemeup.smucoreapi.domain.judge.submission.dto.request.SubmitSolutionRequest;
+import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmissionResultResponse;
 import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmitSolutionResponse;
 import com.solvemeup.smucoreapi.domain.judge.submission.entity.SubmissionResult;
 import com.solvemeup.smucoreapi.domain.judge.submission.entity.Submission;
+import com.solvemeup.smucoreapi.domain.judge.submission.exception.SubmissionResultNotFoundException;
 import com.solvemeup.smucoreapi.domain.judge.submission.repository.SubmissionResultRepository;
 import com.solvemeup.smucoreapi.domain.judge.submission.repository.SubmissionRepository;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
@@ -61,5 +63,11 @@ public class SubmissionService {
         submissionRequestProducer.send(message);
 
         return new SubmitSolutionResponse(submission.getId());
+    }
+
+    public SubmissionResultResponse getResult(Long submissionId) {
+        SubmissionResult submissionResult = submissionResultRepository.findBySubmissionId(submissionId)
+                .orElseThrow(SubmissionResultNotFoundException::new);
+        return SubmissionResultResponse.from(submissionResult);
     }
 }

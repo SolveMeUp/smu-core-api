@@ -1,21 +1,21 @@
-package com.solvemeup.smucoreapi.domain.judge.submission.messaging.producer;
+package com.solvemeup.smucoreapi.domain.judge.execution.messaging.producer;
 
+import com.solvemeup.smucoreapi.domain.judge.execution.messaging.dto.request.ExecutionRequestMessage;
 import com.solvemeup.smucoreapi.global.messaging.config.RabbitConfig;
-import com.solvemeup.smucoreapi.domain.judge.submission.messaging.dto.request.SubmissionRequestMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SubmissionRequestProducer {
+public class ExecutionRequestProducer {
 
     private final RabbitTemplate rabbitTemplate;
 
-    public void send(SubmissionRequestMessage message) {
+    public void send(ExecutionRequestMessage message) {
         rabbitTemplate.convertAndSend(
                 RabbitConfig.JUDGE_EXCHANGE,
-                RabbitConfig.SUBMISSION_REQUEST,
+                RabbitConfig.EXECUTION_REQUEST,
                 message
         );
     }

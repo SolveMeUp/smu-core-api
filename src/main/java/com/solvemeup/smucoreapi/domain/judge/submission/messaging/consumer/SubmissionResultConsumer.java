@@ -1,6 +1,6 @@
 package com.solvemeup.smucoreapi.domain.judge.submission.messaging.consumer;
 
-import com.solvemeup.smucoreapi.domain.judge.submission.entity.SubmissionResult;
+import com.solvemeup.smucoreapi.domain.judge.submission.entity.SubmissionCaseResult;
 import com.solvemeup.smucoreapi.domain.judge.submission.entity.Submission;
 import com.solvemeup.smucoreapi.domain.judge.submission.reader.SubmissionResultReader;
 import com.solvemeup.smucoreapi.global.messaging.config.RabbitConfig;
@@ -19,19 +19,19 @@ public class SubmissionResultConsumer {
     @RabbitListener(queues = RabbitConfig.SUBMISSION_RESULT_QUEUE)
     @Transactional
     public void consume(SubmissionResultMessage message) {
-        SubmissionResult submissionResult = submissionResultReader.getSubmissionResult(message.submissionResultId());
+        SubmissionCaseResult submissionCaseResult = submissionResultReader.getSubmissionResult(message.submissionResultId());
 
-        if (submissionResult.getStatus().isDone()) {
+        if (submissionCaseResult.getStatus().isDone()) {
             return;
         }
 
-        submissionResult.markDone(
+        submissionCaseResult.markDone(
                 message.result(),
                 message.timeUsedMillis(),
                 message.memoryUsedKilobytes()
         );
 
-        Submission submission = submissionResult.getSubmission();
+        Submission submission = submissionCaseResult.getSubmission();
         submission.markDone();
     }
 }

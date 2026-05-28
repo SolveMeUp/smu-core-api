@@ -1,6 +1,6 @@
 package com.solvemeup.smucoreapi.domain.judge.submission.messaging.dto.response;
 
-import com.solvemeup.smucoreapi.domain.judge.submission.entity.SubmissionResultResult;
+import com.solvemeup.smucoreapi.domain.judge.submission.entity.SubmissionCaseResultStatus;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ public record SubmissionResultMessage(
         Long submissionId,
         Long problemId,
 
-        SubmissionResultResult result,
+        SubmissionCaseResultStatus result,
         Integer failedTestIndex,
         Object expectedOutput,
         Object actualOutput,

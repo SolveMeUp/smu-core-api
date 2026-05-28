@@ -5,7 +5,7 @@ COPY . .
 RUN chmod +x ./gradlew
 RUN ./gradlew clean bootJar -x test
 
-# 2) run stage
+# 2) execution stage
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar

@@ -8,121 +8,111 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
-    public static final String SUBMISSION_EXCHANGE = "judge.exchange";
-    public static final String DLX_EXCHANGE = "judge.dlx";
-    public static final String RUN_EXCHANGE = "example.exchange";
-    public static final String EXAMPLE_DLX_EXCHANGE = "example.dlx";
+    public static final String JUDGE_EXCHANGE = "judge.exchange";
+    public static final String JUDGE_DLX_EXCHANGE = "judge.dlx.exchange";
 
-    public static final String SUBMISSION_REQUEST_ROUTING_KEY = "judge.request";
-    public static final String RESULT_ROUTING_KEY = "judge.result";
-    public static final String DLQ_ROUTING_KEY = "judge.dlq";
-    public static final String RUN_ROUTING_KEY = "example.run";
-    public static final String EXAMPLE_RESULT_ROUTING_KEY = "example.result";
-    public static final String EXAMPLE_DLQ_ROUTING_KEY = "example.dlq";
+    public static final String SUBMISSION_REQUEST = "judge.submission.request";
+    public static final String SUBMISSION_RESULT = "judge.submission.result";
+    public static final String SUBMISSION_DLQ = "judge.submission.dead";
 
-    public static final String REQUEST_QUEUE = "judge.request.queue";
-    public static final String SUBMISSION_RESULT_QUEUE = "judge.result.queue";
-    public static final String DLQ_QUEUE = "judge.dlq.queue";
-    public static final String EXAMPLE_RUN_QUEUE = "example.run.queue";
-    public static final String RUN_RESULT_QUEUE = "example.result.queue";
-    public static final String EXAMPLE_DLQ_QUEUE = "example.dlq.queue";
+    public static final String EXECUTION_REQUEST = "judge.execution.request";
+    public static final String EXECUTION_RESULT = "judge.execution.result";
+    public static final String EXECUTION_DLQ = "judge.execution.dead";
+
+    public static final String SUBMISSION_REQUEST_QUEUE = "judge.submission.request.queue";
+    public static final String SUBMISSION_RESULT_QUEUE = "judge.submission.result.queue";
+    public static final String SUBMISSION_DLQ_QUEUE = "judge.submission.dead.queue";
+
+    public static final String EXECUTION_REQUEST_QUEUE = "judge.execution.request.queue";
+    public static final String EXECUTION_RESULT_QUEUE = "judge.execution.result.queue";
+    public static final String EXECUTION_DLQ_QUEUE = "judge.execution.dead.queue";
 
     @Bean
-    public DirectExchange judgeExchange() {
-        return new DirectExchange(SUBMISSION_EXCHANGE);
+    public TopicExchange judgeExchange() {
+        return new TopicExchange(JUDGE_EXCHANGE);
     }
 
     @Bean
-    public DirectExchange dlxExchange() {
-        return new DirectExchange(DLX_EXCHANGE);
+    public DirectExchange judgeDlxExchange() {
+        return new DirectExchange(JUDGE_DLX_EXCHANGE);
     }
 
     @Bean
-    public DirectExchange exampleExchange() {
-        return new DirectExchange(RUN_EXCHANGE);
-    }
-
-    @Bean
-    public DirectExchange exampleDlxExchange() {
-        return new DirectExchange(EXAMPLE_DLX_EXCHANGE);
-    }
-
-    @Bean
-    public Queue requestQueue() {
-        return QueueBuilder.durable(REQUEST_QUEUE)
-                .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
-                .withArgument("x-dead-letter-routing-key", DLQ_ROUTING_KEY)
+    public Queue submissionRequestQueue() {
+        return QueueBuilder.durable(SUBMISSION_REQUEST_QUEUE)
+                .withArgument("x-dead-letter-exchange", JUDGE_DLX_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", SUBMISSION_DLQ)
                 .build();
     }
 
     @Bean
-    public Binding requestBinding() {
-        return BindingBuilder.bind(requestQueue())
+    public Binding submissionRequestBinding() {
+        return BindingBuilder.bind(submissionRequestQueue())
                 .to(judgeExchange())
-                .with(SUBMISSION_REQUEST_ROUTING_KEY);
+                .with(SUBMISSION_REQUEST);
     }
 
     @Bean
-    public Queue exampleRunQueue() {
-        return QueueBuilder.durable(EXAMPLE_RUN_QUEUE)
-                .withArgument("x-dead-letter-exchange", EXAMPLE_DLX_EXCHANGE)
-                .withArgument("x-dead-letter-routing-key", EXAMPLE_DLQ_ROUTING_KEY)
-                .build();
-    }
-
-    @Bean
-    public Binding exampleRunBinding() {
-        return BindingBuilder.bind(exampleRunQueue())
-                .to(exampleExchange())
-                .with(RUN_ROUTING_KEY);
-    }
-
-    @Bean
-    public Queue resultQueue() {
+    public Queue submissionResultQueue() {
         return QueueBuilder.durable(SUBMISSION_RESULT_QUEUE).build();
     }
 
     @Bean
-    public Binding resultBinding() {
-        return BindingBuilder.bind(resultQueue())
+    public Binding submissionResultBinding() {
+        return BindingBuilder.bind(submissionResultQueue())
                 .to(judgeExchange())
-                .with(RESULT_ROUTING_KEY);
+                .with(SUBMISSION_RESULT);
     }
 
     @Bean
-    public Queue exampleResultQueue() {
-        return QueueBuilder.durable(RUN_RESULT_QUEUE).build();
+    public Queue submissionDlqQueue() {
+        return QueueBuilder.durable(SUBMISSION_DLQ_QUEUE).build();
     }
 
     @Bean
-    public Binding exampleResultBinding() {
-        return BindingBuilder.bind(exampleResultQueue())
-                .to(exampleExchange())
-                .with(EXAMPLE_RESULT_ROUTING_KEY);
+    public Binding submissionDlqBinding() {
+        return BindingBuilder.bind(submissionDlqQueue())
+                .to(judgeDlxExchange())
+                .with(SUBMISSION_DLQ);
     }
 
     @Bean
-    public Queue deadLetterQueue() {
-        return QueueBuilder.durable(DLQ_QUEUE).build();
+    public Queue executionRequestQueue() {
+        return QueueBuilder.durable(EXECUTION_REQUEST_QUEUE)
+                .withArgument("x-dead-letter-exchange", JUDGE_DLX_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", EXECUTION_DLQ)
+                .build();
     }
 
     @Bean
-    public Binding dlqBinding() {
-        return BindingBuilder.bind(deadLetterQueue())
-                .to(dlxExchange())
-                .with(DLQ_ROUTING_KEY);
+    public Binding executionRequestBinding() {
+        return BindingBuilder.bind(executionRequestQueue())
+                .to(judgeExchange())
+                .with(EXECUTION_REQUEST);
     }
 
     @Bean
-    public Queue exampleDeadLetterQueue() {
-        return QueueBuilder.durable(EXAMPLE_DLQ_QUEUE).build();
+    public Queue executionResultQueue() {
+        return QueueBuilder.durable(EXECUTION_RESULT_QUEUE).build();
     }
 
     @Bean
-    public Binding exampleDlqBinding() {
-        return BindingBuilder.bind(exampleDeadLetterQueue())
-                .to(exampleDlxExchange())
-                .with(EXAMPLE_DLQ_ROUTING_KEY);
+    public Binding executionResultBinding() {
+        return BindingBuilder.bind(executionResultQueue())
+                .to(judgeExchange())
+                .with(EXECUTION_RESULT);
+    }
+
+    @Bean
+    public Queue executionDlqQueue() {
+        return QueueBuilder.durable(EXECUTION_DLQ_QUEUE).build();
+    }
+
+    @Bean
+    public Binding executionDlqBinding() {
+        return BindingBuilder.bind(executionDlqQueue())
+                .to(judgeDlxExchange())
+                .with(EXECUTION_DLQ);
     }
 
     @Bean

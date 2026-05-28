@@ -2,11 +2,12 @@ package com.solvemeup.smucoreapi.domain.judge.submission.service;
 
 import com.solvemeup.smucoreapi.domain.judge.problem.entity.Problem;
 import com.solvemeup.smucoreapi.domain.judge.problem.reader.ProblemReader;
-import com.solvemeup.smucoreapi.domain.judge.submission.dto.request.SubmitSolutionRequest;
-import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmitSolutionResponse;
-import com.solvemeup.smucoreapi.domain.judge.submission.entity.SubmissionResult;
+import com.solvemeup.smucoreapi.domain.judge.submission.dto.request.SubmissionCreateRequest;
+import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmissionCreateResponse;
+import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmissionDetailResponse;
 import com.solvemeup.smucoreapi.domain.judge.submission.entity.Submission;
-import com.solvemeup.smucoreapi.domain.judge.submission.repository.SubmissionResultRepository;
+import com.solvemeup.smucoreapi.domain.judge.submission.exception.AccessDeniedSubmissionException;
+import com.solvemeup.smucoreapi.domain.judge.submission.reader.SubmissionReader;
 import com.solvemeup.smucoreapi.domain.judge.submission.repository.SubmissionRepository;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
@@ -23,16 +24,16 @@ public class SubmissionService {
 
     private final UserReader userReader;
     private final ProblemReader problemReader;
+    private final SubmissionReader submissionReader;
 
     private final SubmissionRepository submissionRepository;
-    private final SubmissionResultRepository submissionResultRepository;
 
     private final SubmissionRequestProducer submissionRequestProducer;
 
     @Transactional
-    public SubmitSolutionResponse submit(Long userId, Long ProblemId, SubmitSolutionRequest request) {
+    public SubmissionCreateResponse createSubmission(Long userId, Long problemId, SubmissionCreateRequest request) {
         User user = userReader.getUser(userId);
-        Problem problem = problemReader.getProblem(ProblemId);
+        Problem problem = problemReader.getProblem(problemId);
 
         Submission submission = Submission.create(
                 user,
@@ -42,24 +43,21 @@ public class SubmissionService {
         );
         submissionRepository.save(submission);
 
-        SubmissionResult submissionResult = SubmissionResult.create(submission);
-        submissionResultRepository.save(submissionResult);
-
-        SubmissionRequestMessage message = new SubmissionRequestMessage(
-                submissionResult.getId(),
-                submission.getId(),
-                problem.getId(),
-                problem.getFunctionName(),
-                problem.getParameters(),
-                problem.getReturnType(),
-                problem.getTimeLimitMillis(),
-                problem.getMemoryLimitKilobytes(),
-                request.language(),
-                request.sourceCode()
-        );
+        SubmissionRequestMessage message =
+                SubmissionRequestMessage.from(submission, problem);
 
         submissionRequestProducer.send(message);
 
-        return new SubmitSolutionResponse(submission.getId());
+        return new SubmissionCreateResponse(submission.getId());
+    }
+
+    public SubmissionDetailResponse getSubmissionDetail(Long userId, Long submissionId) {
+        Submission submission = submissionReader.getSubmission(submissionId);
+
+        if (!submission.getUser().getId().equals(userId)) {
+            throw new AccessDeniedSubmissionException();
+        }
+
+        return SubmissionDetailResponse.from(submission);
     }
 }

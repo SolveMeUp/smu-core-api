@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 @Table(
         name = "sample_cases",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"problem_id", "order_index"})
+                @UniqueConstraint(
+                        name = "uk_sample_cases_problem_order",
+                        columnNames = {"problem_id", "order_index"}
+                )
         }
 )
 @Getter
@@ -25,12 +28,12 @@ public class SampleCase extends BaseTimeEntity {
     @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
 
-    @Column(columnDefinition = "MEDIUMTEXT", nullable = false)
-    private String argumentsJson;
-
-    @Column(columnDefinition = "MEDIUMTEXT", nullable = false)
-    private String expectedOutputJson;
-
     @Column(nullable = false)
     private int orderIndex;
+
+    @Column(columnDefinition = "MEDIUMTEXT", nullable = false)
+    private String arguments;
+
+    @Column(columnDefinition = "MEDIUMTEXT", nullable = false)
+    private String expectedOutput;
 }

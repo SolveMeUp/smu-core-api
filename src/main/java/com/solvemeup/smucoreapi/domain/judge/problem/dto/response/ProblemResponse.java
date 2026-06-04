@@ -30,12 +30,12 @@ public record ProblemResponse(
         }
     }
 
-    public record SampleCaseResponse(int orderIndex, String argumentsJson, String expectedOutputJson) {
+    public record SampleCaseResponse(int orderIndex, String arguments, String expectedOutput) {
         public static SampleCaseResponse from(SampleCase sampleCase) {
             return new SampleCaseResponse(
                     sampleCase.getOrderIndex(),
-                    sampleCase.getArgumentsJson(),
-                    sampleCase.getExpectedOutputJson()
+                    sampleCase.getArguments(),
+                    sampleCase.getExpectedOutput()
             );
         }
     }

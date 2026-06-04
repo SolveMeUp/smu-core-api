@@ -37,7 +37,12 @@ public enum ErrorCode {
     // =========================
     // SUBMISSION
     // =========================
-    SUBMISSION_RESULT_NOT_FOUND(HttpStatus.NOT_FOUND, "JUDGE-001", "해당 저지를 찾을 수 없습니다."),
+    SUBMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "JUDGE-001", "해당 제출을 찾을 수 없습니다."),
+
+    // =========================
+    // EXECUTION
+    // =========================
+    EXECUTION_NOT_FOUND(HttpStatus.NOT_FOUND, "JUDGE-002", "해당 실행을 찾을 수 없습니다."),
 
     // =========================
     // Common

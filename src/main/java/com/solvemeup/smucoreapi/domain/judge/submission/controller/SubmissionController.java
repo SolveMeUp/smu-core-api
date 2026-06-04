@@ -1,8 +1,8 @@
 package com.solvemeup.smucoreapi.domain.judge.submission.controller;
 
 import com.solvemeup.smucoreapi.domain.judge.submission.dto.request.SubmissionRequest;
-import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmissionResultResponse;
 import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmissionResponse;
+import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmissionStatusResponse;
 import com.solvemeup.smucoreapi.domain.judge.submission.service.SubmissionService;
 import com.solvemeup.smucoreapi.global.security.annotation.AuthUserId;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class SubmissionController {
     }
 
     @GetMapping("/{submissionId}")
-    public ResponseEntity<SubmissionResultResponse> getResult(@PathVariable Long submissionId) {
-        return ResponseEntity.ok(submissionService.getResult(submissionId));
+    public ResponseEntity<SubmissionStatusResponse> getSubmissionStatus(@PathVariable Long submissionId) {
+        return ResponseEntity.ok(submissionService.getSubmissionStatus(submissionId));
     }
 }

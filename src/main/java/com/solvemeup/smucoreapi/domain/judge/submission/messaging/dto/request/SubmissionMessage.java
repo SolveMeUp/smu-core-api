@@ -6,7 +6,7 @@ import com.solvemeup.smucoreapi.domain.judge.submission.entity.Language;
 
 import java.util.List;
 
-public record SubmissionRequestMessage(
+public record SubmissionMessage(
         Long submissionResultId,
         Long submissionId,
         Long problemId,

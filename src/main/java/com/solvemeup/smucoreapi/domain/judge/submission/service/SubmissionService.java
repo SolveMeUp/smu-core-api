@@ -2,9 +2,9 @@ package com.solvemeup.smucoreapi.domain.judge.submission.service;
 
 import com.solvemeup.smucoreapi.domain.judge.problem.entity.Problem;
 import com.solvemeup.smucoreapi.domain.judge.problem.reader.ProblemReader;
-import com.solvemeup.smucoreapi.domain.judge.submission.dto.request.SubmitSolutionRequest;
+import com.solvemeup.smucoreapi.domain.judge.submission.dto.request.SubmissionRequest;
 import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmissionResultResponse;
-import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmitSolutionResponse;
+import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmissionResponse;
 import com.solvemeup.smucoreapi.domain.judge.submission.entity.SubmissionResult;
 import com.solvemeup.smucoreapi.domain.judge.submission.entity.Submission;
 import com.solvemeup.smucoreapi.domain.judge.submission.exception.SubmissionResultNotFoundException;
@@ -12,7 +12,7 @@ import com.solvemeup.smucoreapi.domain.judge.submission.repository.SubmissionRes
 import com.solvemeup.smucoreapi.domain.judge.submission.repository.SubmissionRepository;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
-import com.solvemeup.smucoreapi.domain.judge.submission.messaging.dto.request.SubmissionRequestMessage;
+import com.solvemeup.smucoreapi.domain.judge.submission.messaging.dto.request.SubmissionMessage;
 import com.solvemeup.smucoreapi.domain.judge.submission.messaging.producer.SubmissionRequestProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class SubmissionService {
     private final SubmissionRequestProducer submissionRequestProducer;
 
     @Transactional
-    public SubmitSolutionResponse submit(Long userId, SubmitSolutionRequest request) {
+    public SubmissionResponse submit(Long userId, SubmissionRequest request) {
         User user = userReader.getUser(userId);
         Problem problem = problemReader.getPublishedProblem(request.problemId());
 
@@ -47,7 +47,7 @@ public class SubmissionService {
         SubmissionResult submissionResult = SubmissionResult.create(submission);
         submissionResultRepository.save(submissionResult);
 
-        SubmissionRequestMessage message = new SubmissionRequestMessage(
+        SubmissionMessage message = new SubmissionMessage(
                 submissionResult.getId(),
                 submission.getId(),
                 problem.getId(),
@@ -62,7 +62,7 @@ public class SubmissionService {
 
         submissionRequestProducer.send(message);
 
-        return new SubmitSolutionResponse(submission.getId());
+        return new SubmissionResponse(submission.getId());
     }
 
     public SubmissionResultResponse getResult(Long submissionId) {

@@ -1,8 +1,8 @@
 package com.solvemeup.smucoreapi.domain.judge.submission.controller;
 
-import com.solvemeup.smucoreapi.domain.judge.submission.dto.request.SubmitSolutionRequest;
+import com.solvemeup.smucoreapi.domain.judge.submission.dto.request.SubmissionRequest;
 import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmissionResultResponse;
-import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmitSolutionResponse;
+import com.solvemeup.smucoreapi.domain.judge.submission.dto.response.SubmissionResponse;
 import com.solvemeup.smucoreapi.domain.judge.submission.service.SubmissionService;
 import com.solvemeup.smucoreapi.global.security.annotation.AuthUserId;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +17,8 @@ public class SubmissionController {
     private final SubmissionService submissionService;
 
     @PostMapping
-    public ResponseEntity<SubmitSolutionResponse> submit(@AuthUserId Long userId,
-                                                         @RequestBody SubmitSolutionRequest request) {
+    public ResponseEntity<SubmissionResponse> submit(@AuthUserId Long userId,
+                                                     @RequestBody SubmissionRequest request) {
         return ResponseEntity.accepted().body(submissionService.submit(userId, request));
     }
 

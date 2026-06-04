@@ -1,7 +1,8 @@
 package com.solvemeup.smucoreapi.domain.judge.execution.messaging.dto.request;
 
-public record ExecutionSampleCase(
+public record ExecutionTestCase(
         int caseIndex,
-        String argumentsJson
+        String arguments,
+        String expectedOutput
 ) {
 }

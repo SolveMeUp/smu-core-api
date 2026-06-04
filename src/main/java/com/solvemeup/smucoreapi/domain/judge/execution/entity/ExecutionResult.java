@@ -1,5 +1,7 @@
 package com.solvemeup.smucoreapi.domain.judge.execution.entity;
 
+import com.solvemeup.smucoreapi.domain.judge.common.Verdict;
+import com.solvemeup.smucoreapi.global.entity.CreatedTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,12 +11,15 @@ import lombok.NoArgsConstructor;
 @Table(
         name = "execution_results",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"execution_id", "case_index"})
+                @UniqueConstraint(
+                        name = "uk_execution_results_execution_case",
+                        columnNames = {"execution_id", "case_index"}
+                )
         }
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ExecutionResult {
+public class ExecutionResult extends CreatedTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,19 +29,20 @@ public class ExecutionResult {
     @JoinColumn(name = "execution_id", nullable = false)
     private Execution execution;
 
-    @Column(name = "case_index", nullable = false)
+    @Column(nullable = false)
     private int caseIndex;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private ExecutionResultStatus status;
+    @Column(nullable = false)
+    private Verdict verdict;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT", nullable = false)
+    @Column(columnDefinition = "MEDIUMTEXT", nullable = false)
+    private String arguments;
+
+    @Column(columnDefinition = "MEDIUMTEXT", nullable = false)
     private String expectedOutput;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String actualOutput;
 
     private Integer timeUsedMillis;
@@ -46,7 +52,8 @@ public class ExecutionResult {
     public static ExecutionResult create(
             Execution execution,
             int caseIndex,
-            ExecutionResultStatus status,
+            Verdict verdict,
+            String arguments,
             String expectedOutput,
             String actualOutput,
             Integer timeUsedMillis,
@@ -55,7 +62,8 @@ public class ExecutionResult {
         ExecutionResult executionResult = new ExecutionResult();
         executionResult.execution = execution;
         executionResult.caseIndex = caseIndex;
-        executionResult.status = status;
+        executionResult.verdict = verdict;
+        executionResult.arguments = arguments;
         executionResult.expectedOutput = expectedOutput;
         executionResult.actualOutput = actualOutput;
         executionResult.timeUsedMillis = timeUsedMillis;

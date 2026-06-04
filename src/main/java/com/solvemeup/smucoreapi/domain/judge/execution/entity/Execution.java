@@ -1,7 +1,7 @@
 package com.solvemeup.smucoreapi.domain.judge.execution.entity;
 
+import com.solvemeup.smucoreapi.domain.judge.common.Language;
 import com.solvemeup.smucoreapi.domain.judge.problem.entity.Problem;
-import com.solvemeup.smucoreapi.domain.judge.submission.entity.Language;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.global.entity.CreatedTimeEntity;
 import jakarta.persistence.*;
@@ -32,19 +32,18 @@ public class Execution extends CreatedTimeEntity {
     private Problem problem;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private Language language;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT", nullable = false)
+    @Column(columnDefinition = "MEDIUMTEXT", nullable = false)
     private String sourceCode;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private ExecutionStatus status;
 
     @Column(nullable = false)
     private int totalCaseCount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ExecutionStatus status;
 
     private LocalDateTime finishedAt;
 
@@ -54,18 +53,16 @@ public class Execution extends CreatedTimeEntity {
         execution.problem = problem;
         execution.language = language;
         execution.sourceCode = sourceCode;
-        execution.status = RUNNING;
         execution.totalCaseCount = totalCaseCount;
+        execution.status = RUNNING;
         return execution;
     }
 
     public void markDone() {
+        if (this.status == DONE) {
+            return;
+        }
         this.status = DONE;
-        this.finishedAt = LocalDateTime.now();
-    }
-
-    public void markError() {
-        this.status = ERROR;
         this.finishedAt = LocalDateTime.now();
     }
 }

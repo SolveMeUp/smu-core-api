@@ -13,7 +13,6 @@ import com.solvemeup.smucoreapi.domain.judge.run.repository.RunRepository;
 import com.solvemeup.smucoreapi.domain.judge.problem.entity.SampleCase;
 import com.solvemeup.smucoreapi.domain.judge.problem.entity.Problem;
 import com.solvemeup.smucoreapi.domain.judge.problem.reader.ProblemReader;
-import com.solvemeup.smucoreapi.domain.judge.problem.repository.SampleCaseRepository;
 import com.solvemeup.smucoreapi.domain.judge.run.repository.RunResultRepository;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
@@ -31,20 +30,18 @@ public class RunService {
     private final UserReader userReader;
     private final ProblemReader problemReader;
 
-    private final SampleCaseRepository sampleCaseRepository;
-
     private final RunRepository runRepository;
     private final RunResultRepository runResultRepository;
 
     private final RunRequestProducer producer;
 
     @Transactional
-    public RunResponse execute(Long userId, Long problemId, RunRequest request) {
+    public RunResponse execute(Long userId, RunRequest request) {
         User user = userReader.getUser(userId);
-        Problem problem = problemReader.getProblem(problemId);
+        Long problemId = request.problemId();
+        Problem problem = problemReader.getPublishedProblem(problemId);
 
-        List<SampleCase> sampleCases =
-                sampleCaseRepository.findByProblemIdOrderByOrderIndexAsc(problemId);
+        List<SampleCase> sampleCases = problemReader.getSampleCases(problemId);
 
         Run run = Run.create(
                 user,

@@ -32,9 +32,9 @@ public class SubmissionService {
     private final SubmissionRequestProducer submissionRequestProducer;
 
     @Transactional
-    public SubmitSolutionResponse submit(Long userId, Long ProblemId, SubmitSolutionRequest request) {
+    public SubmitSolutionResponse submit(Long userId, SubmitSolutionRequest request) {
         User user = userReader.getUser(userId);
-        Problem problem = problemReader.getProblem(ProblemId);
+        Problem problem = problemReader.getPublishedProblem(request.problemId());
 
         Submission submission = Submission.create(
                 user,

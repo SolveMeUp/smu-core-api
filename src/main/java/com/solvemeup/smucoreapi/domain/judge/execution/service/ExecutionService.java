@@ -19,11 +19,14 @@ import com.solvemeup.smucoreapi.domain.judge.problem.reader.ProblemReader;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -39,6 +42,9 @@ public class ExecutionService {
 
     @Transactional
     public ExecutionResponse execute(Long userId, ExecutionRequest request) {
+        log.info("실행 채점 요청 수신 userId={} problemId={} language={}",
+                userId, request.problemId(), request.language());
+
         User user = userReader.getUser(userId);
         Long problemId = request.problemId();
         Problem problem = problemReader.getPublishedProblem(problemId);
@@ -55,6 +61,9 @@ public class ExecutionService {
 
         ExecutionRequestMessage message = buildRequestMessage(execution, problem, sampleCases, request);
         executionRequestProducer.send(message);
+
+        log.info("실행 채점 요청 발행 executionId={} userId={} problemId={} language={} caseCount={}",
+                execution.getId(), userId, problemId, request.language(), sampleCases.size());
 
         return new ExecutionResponse(execution.getId());
     }
@@ -106,12 +115,16 @@ public class ExecutionService {
         Execution execution = executionRepository.findById(message.executionId())
                 .orElse(null);
         if (execution == null) {
+            log.warn("실행 결과 무시: 알 수 없는 executionId={} caseIndex={}",
+                    message.executionId(), message.caseIndex());
             return;
         }
 
         if (executionResultRepository.existsByExecutionIdAndCaseIndex(
                 message.executionId(),
                 message.caseIndex())) {
+            log.debug("실행 결과 중복 무시 executionId={} caseIndex={}",
+                    message.executionId(), message.caseIndex());
             return;
         }
 
@@ -130,6 +143,9 @@ public class ExecutionService {
         long completedCount = executionResultRepository.countByExecutionId(message.executionId());
         if (completedCount >= execution.getTotalCaseCount()) {
             execution.markDone();
+            long elapsedMs = Duration.between(execution.getCreatedAt(), execution.getFinishedAt()).toMillis();
+            log.info("실행 채점 완료 executionId={} caseCount={} elapsedMs={}",
+                    execution.getId(), execution.getTotalCaseCount(), elapsedMs);
         }
     }
 }

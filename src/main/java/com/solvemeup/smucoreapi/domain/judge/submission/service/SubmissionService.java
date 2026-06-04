@@ -15,11 +15,14 @@ import com.solvemeup.smucoreapi.domain.judge.submission.repository.SubmissionRep
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -34,6 +37,9 @@ public class SubmissionService {
 
     @Transactional
     public SubmissionResponse submit(Long userId, SubmissionRequest request) {
+        log.info("제출 채점 요청 수신 userId={} problemId={} language={}",
+                userId, request.problemId(), request.language());
+
         User user = userReader.getUser(userId);
         Problem problem = problemReader.getPublishedProblem(request.problemId());
 
@@ -47,6 +53,9 @@ public class SubmissionService {
 
         SubmissionRequestMessage message = buildRequestMessage(submission, problem, request);
         submissionRequestProducer.send(message);
+
+        log.info("제출 채점 요청 발행 submissionId={} userId={} problemId={} language={}",
+                submission.getId(), userId, problem.getId(), request.language());
 
         return new SubmissionResponse(submission.getId());
     }
@@ -81,10 +90,12 @@ public class SubmissionService {
         Submission submission = submissionRepository.findById(message.submissionId())
                 .orElse(null);
         if (submission == null) {
+            log.warn("제출 결과 무시: 알 수 없는 submissionId={}", message.submissionId());
             return;
         }
 
         if (submission.getStatus().isDone()) {
+            log.debug("제출 결과 중복 무시(이미 완료) submissionId={}", message.submissionId());
             return;
         }
 
@@ -97,5 +108,9 @@ public class SubmissionService {
                 message.timeUsedMillis(),
                 message.memoryUsedKilobytes()
         );
+
+        long elapsedMs = Duration.between(submission.getCreatedAt(), submission.getFinishedAt()).toMillis();
+        log.info("제출 채점 완료 submissionId={} verdict={} elapsedMs={}",
+                submission.getId(), message.verdict(), elapsedMs);
     }
 }

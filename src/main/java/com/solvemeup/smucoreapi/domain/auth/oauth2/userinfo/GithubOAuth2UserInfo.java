@@ -1,7 +1,7 @@
 package com.solvemeup.smucoreapi.domain.auth.oauth2.userinfo;
 
-import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
 import com.solvemeup.smucoreapi.domain.auth.exception.OAuth2AttributeMissingException;
+import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;

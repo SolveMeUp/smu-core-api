@@ -1,7 +1,7 @@
 package com.solvemeup.smucoreapi.domain.auth.oauth2.userinfo;
 
-import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
 import com.solvemeup.smucoreapi.domain.auth.exception.UnsupportedOAuth2ProviderException;
+import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
 
 import java.util.Map;
 

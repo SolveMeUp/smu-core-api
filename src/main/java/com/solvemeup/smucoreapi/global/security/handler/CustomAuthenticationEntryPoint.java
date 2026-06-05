@@ -13,7 +13,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 
-import static com.solvemeup.smucoreapi.global.exception.ErrorCode.*;
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.AUTH_UNAUTHORIZED;
 
 /**
  * 인증되지 않은 요청에 대한 공통 처리 EntryPoint.

@@ -13,7 +13,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 
-import static com.solvemeup.smucoreapi.global.exception.ErrorCode.*;
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.AUTH_FORBIDDEN;
 
 /**
  * 인가 실패(권한 부족) 시 공통 처리 핸들러.

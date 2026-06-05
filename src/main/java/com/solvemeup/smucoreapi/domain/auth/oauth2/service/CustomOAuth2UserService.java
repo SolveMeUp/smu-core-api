@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import static com.solvemeup.smucoreapi.global.exception.ErrorCode.*;
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.OAUTH2_LOGIN_FAILED;
 
 /**
  * OAuth2 로그인 시 공급자 사용자 정보를 로드하는 커스텀 OAuth2UserService.

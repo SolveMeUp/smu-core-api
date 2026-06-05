@@ -51,3 +51,8 @@ management:
     metrics:
       export:
         enabled: true
+
+app:
+  security:
+    csrf:
+      enabled: true   # 기본값: 활성(운영 포함). 테스트 편의를 위해 dev/local에서만 비활성

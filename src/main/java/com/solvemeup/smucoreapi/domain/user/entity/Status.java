@@ -21,10 +21,5 @@ public enum Status {
     /**
      * 탈퇴 상태, 서비스에서 숨김 처리
      */
-    DELETED,
-
-    /**
-     * 개인정보 익명화 완료 상태
-     */
-    ANONYMIZED
+    DELETED
 }

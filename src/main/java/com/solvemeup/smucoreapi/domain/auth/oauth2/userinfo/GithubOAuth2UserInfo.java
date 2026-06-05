@@ -1,25 +1,20 @@
-package com.solvemeup.smucoreapi.domain.auth.oauth2.response;
+package com.solvemeup.smucoreapi.domain.auth.oauth2.userinfo;
 
 import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
-import com.solvemeup.smucoreapi.domain.auth.oauth2.exception.OAuth2AttributeMissingException;
+import com.solvemeup.smucoreapi.domain.auth.exception.OAuth2AttributeMissingException;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
 import static com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider.GITHUB;
 
 /**
- * GitHub OAuth2 사용자 응답을 표현하는 구현체.
+ * GitHub OAuth2 응답을 표현하는 {@link OAuth2UserInfo} 구현체.
  *
- * <p>GitHub OAuth2 응답의 attributes 맵에서
- * 애플리케이션에 필요한 사용자 식별 정보를 추출한다.
+ * <p>GitHub이 내려준 attributes 맵에서 사용자 식별 ID를 추출한다.
  */
-@Slf4j
 @RequiredArgsConstructor
-@ToString
-public final class GithubResponse implements OAuth2Response {
+public final class GithubOAuth2UserInfo implements OAuth2UserInfo {
 
     private final Map<String, Object> attributes;
 
@@ -34,13 +29,11 @@ public final class GithubResponse implements OAuth2Response {
     }
 
     /**
-     * OAuth2 응답에서 필수 문자열 속성을 조회한다.
+     * attributes에서 필수 문자열 속성을 꺼낸다.
      *
-     * @throws OAuth2AttributeMissingException 필수 속성이 존재하지 않을 경우
+     * @throws OAuth2AttributeMissingException 해당 속성이 없을 경우
      */
     private String requiredString(String key) {
-        log.debug("Required attribute '{}' found={}", key, attributes.containsKey(key));
-
         Object value = attributes.get(key);
         if (value == null) {
             throw new OAuth2AttributeMissingException(GITHUB, key);

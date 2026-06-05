@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * 사용자 도메인의 내부 전용 조회 리포지토리.
  *
- * <p>삭제(DELETED) 및 익명화(ANONYMIZED) 상태의 사용자까지
+ * <p>삭제(DELETED) 상태의 사용자까지
  * 포함하여 조회가 필요한 경우에만 사용한다.
  *
  * <p>일반 서비스 로직에서는 {@code UserRepository} 사용을 권장한다.

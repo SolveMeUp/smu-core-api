@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
  * 서비스에 노출되는 사용자 조회 전용 리포지토리.
  *
  * <p>ACTIVE, BLOCKED 상태의 사용자만 조회 대상이며,
- * 탈퇴(DELETED) 및 익명화(ANONYMIZED) 사용자는 제외한다.
+ * 탈퇴(DELETED) 사용자는 제외한다.
  *
  * <p>랭킹 조회 시 {@code rank} 값은 전체 사용자 기준의 순위를 의미한다.
  */
@@ -30,13 +30,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 u.status AS status,
                 RANK() OVER (ORDER BY u.rating DESC) AS `rank`
             FROM users u
-            WHERE u.status NOT IN ('DELETED', 'ANONYMIZED')
+            WHERE u.status <> 'DELETED'
             ORDER BY u.rating DESC, u.id
             """,
             countQuery = """
                     SELECT COUNT(*)
                     FROM users u
-                    WHERE u.status NOT IN ('DELETED', 'ANONYMIZED')
+                    WHERE u.status <> 'DELETED'
                     """,
             nativeQuery = true
     )
@@ -45,7 +45,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = """
             SELECT COUNT(*) + 1
             FROM users u
-            WHERE u.status NOT IN ('DELETED', 'ANONYMIZED') AND u.rating > :rating
+            WHERE u.status <> 'DELETED' AND u.rating > :rating
             """, nativeQuery = true)
     long calculateCompetitionRankByRating(@Param("rating") int rating);
 }

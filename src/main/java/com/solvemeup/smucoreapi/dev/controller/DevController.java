@@ -3,9 +3,8 @@ package com.solvemeup.smucoreapi.dev.controller;
 import com.solvemeup.smucoreapi.domain.auth.oauth2.principal.CustomOAuth2User;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
-import com.solvemeup.smucoreapi.global.exception.ErrorCode;
-import com.solvemeup.smucoreapi.global.exception.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,27 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-import static com.solvemeup.smucoreapi.domain.auth.oauth2.principal.LoginEvent.*;
-
 /**
- * 로컬(local) 및 개발(dev) 환경에서만 사용되는 인증 우회 컨트롤러.
+ * 로컬(local)·개발(dev) 환경 전용 인증 우회 컨트롤러.
  *
- * <p>OAuth2 로그인 과정을 거치지 않고,
- * 지정한 사용자 ID에 대해 세션 기반 인증을 직접 생성한다.
+ * <p>소셜 로그인 과정을 거치지 않고 지정한 userId로 세션 인증을 바로 생성한다.
+ * Postman·curl·프론트 연동 등 빠른 인증이 필요한 테스트 용도다.
  *
- * <p>주 용도:
- * <ul>
- *   <li>Postman, curl 등을 이용한 API 테스트</li>
- *   <li>프론트엔드/백엔드 연동 개발 시 빠른 인증 처리</li>
- *   <li>비동기 로직, 메시징, 권한 로직 검증</li>
- * </ul>
- *
- * <p>이 컨트롤러는 {@code local}, {@code dev} 프로파일에서만 활성화되며,
- * 운영(production) 환경에서는 절대 로드되지 않는다.
- *
- * <p><strong>주의:</strong>
- * 이 컨트롤러는 인증 보안을 우회하므로
- * 운영 환경에 포함되지 않도록 프로파일 설정을 반드시 유지해야 한다.
+ * <p><strong>주의:</strong> 인증을 우회하므로 {@code @Profile({"local", "dev"})}로
+ * 운영 환경에서는 절대 로드되지 않는다. 이 프로파일 제약을 반드시 유지할 것.
  */
 @Slf4j
 @Profile({"local", "dev"})
@@ -54,84 +41,43 @@ public class DevController {
 
     private final UserReader userReader;
 
+    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
+
     @PostMapping("/login")
-    public ResponseEntity<?> devLogin(@RequestParam Long userId, HttpServletRequest request) {
+    public ResponseEntity<Map<String, String>> devLogin(@RequestParam Long userId,
+                                                        HttpServletRequest request,
+                                                        HttpServletResponse response) {
+        User user = userReader.getUser(userId);
+
+        CustomOAuth2User principal = new CustomOAuth2User(user.getId(), user.getRole());
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+
+        // 세션 고정 방지 및 유저 전환을 위해 기존 세션을 버리고 새로 발급한다.
         HttpSession existingSession = request.getSession(false);
         if (existingSession != null) {
-            Object ctx = existingSession.getAttribute(
-                    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY
-            );
-
-            if (ctx instanceof SecurityContext securityContext) {
-                Authentication authentication = securityContext.getAuthentication();
-
-                if (authentication != null
-                        && authentication.isAuthenticated()
-                        && authentication.getPrincipal() instanceof CustomOAuth2User currentUser) {
-
-                    Long currentUserId = currentUser.getUserId();
-
-                    if (currentUserId.equals(userId)) {
-                        log.info("[DEV] already logged in as same user. userId={}", userId);
-                        return ResponseEntity.ok(
-                                Map.of("message", "already logged in")
-                        );
-                    }
-
-                    log.info("[DEV] switch login {} -> {}", currentUserId, userId);
-                    existingSession.invalidate();
-                }
-            }
+            existingSession.invalidate();
         }
-
-        User user = userReader.getUser(userId);
-        if (user.isBlocked()) {
-            return ResponseEntity
-                    .status(ErrorCode.AUTH_BLOCKED_USER.getStatus())
-                    .body(ErrorResponse.of(request.getRequestURI(), ErrorCode.AUTH_BLOCKED_USER));
-        }
-
-        CustomOAuth2User principal =
-                new CustomOAuth2User(user.getId(), user.getRole(), NONE);
-
-        Authentication auth = new UsernamePasswordAuthenticationToken(
-                principal, null, principal.getAuthorities()
-        );
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(auth);
+        context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
-
-        HttpSession newSession = request.getSession(true);
-        newSession.setAttribute(
-                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                context
-        );
+        securityContextRepository.saveContext(context, request, response);
 
         log.info("[DEV] login success. userId={}", userId);
-        return ResponseEntity.ok(
-                Map.of("message", "login success")
-        );
+        return ResponseEntity.ok(Map.of("message", "login success"));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> devLogout(HttpServletRequest request) {
+    public ResponseEntity<Map<String, String>> devLogout(HttpServletRequest request) {
         SecurityContextHolder.clearContext();
 
         HttpSession session = request.getSession(false);
-
-        if (session == null) {
-            log.info("[DEV] logout requested but no active session");
-            return ResponseEntity.ok(
-                    Map.of("message", "already logged out")
-            );
+        if (session != null) {
+            session.invalidate();
         }
 
-        session.invalidate();
         log.info("[DEV] logout success");
-
-        return ResponseEntity.ok(
-                Map.of("message", "logout success")
-        );
+        return ResponseEntity.ok(Map.of("message", "logout success"));
     }
 }

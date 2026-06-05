@@ -23,7 +23,6 @@ import static com.solvemeup.smucoreapi.domain.user.entity.Status.*;
  *   <li>{@code ACTIVE} : 정상 사용자</li>
  *   <li>{@code BLOCKED} : 로그인만 제한된 사용자</li>
  *   <li>{@code DELETED} : 탈퇴 처리된 사용자</li>
- *   <li>{@code ANONYMIZED} : 개인정보가 제거된 사용자</li>
  * </ul>
  */
 @Entity
@@ -35,7 +34,7 @@ import static com.solvemeup.smucoreapi.domain.user.entity.Status.*;
         }
 )
 @SQLDelete(sql = "UPDATE users SET status='DELETED', deleted_at=NOW() WHERE id=? AND version=?")
-@SQLRestriction("status NOT IN ('DELETED', 'ANONYMIZED')")
+@SQLRestriction("status <> 'DELETED'")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends SoftDeleteEntity {
@@ -135,20 +134,6 @@ public class User extends SoftDeleteEntity {
      */
     public void restoreFromDeleted() {
         if (this.status != DELETED) {
-            return;
-        }
-
-        this.status = ACTIVE;
-        super.restore();
-    }
-
-    /**
-     * 익명화(ANONYMIZED)된 사용자를 다시 활성화한다.
-     *
-     * <p>ANONYMIZED 상태가 아닐 경우 아무 동작도 하지 않는다.
-     */
-    public void restoreFromAnonymized() {
-        if (this.status != ANONYMIZED) {
             return;
         }
 

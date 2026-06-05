@@ -1,15 +1,13 @@
 package com.solvemeup.smucoreapi.domain.auth.exception;
 
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.AUTH_BLOCKED_USER;
+
 /**
- * 차단된 사용자가 인증 대상이 되었을 때 발생하는 내부 예외.
- *
- * <p>이 예외는 도메인/인증 내부 로직에서만 사용되며,
- * Security 레이어에서 {@link org.springframework.security.core.AuthenticationException}
- * 으로 변환되어 처리된다.
+ * 차단(BLOCKED)된 사용자가 로그인을 시도한 경우 발생하는 예외.
  */
-public class BlockedUserException extends RuntimeException {
+public class BlockedUserException extends OAuth2LoginException {
 
     public BlockedUserException() {
-        super("Blocked user tried to login");
+        super(AUTH_BLOCKED_USER, "Blocked user tried to login");
     }
 }

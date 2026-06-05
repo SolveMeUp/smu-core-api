@@ -10,6 +10,11 @@ spring:
       hibernate:
         format_sql: true
 
+app:
+  security:
+    csrf:
+      enabled: false   # K6·Postman 테스트 무마찰을 위해 비활성
+
 logging:
   level:
     com.solvemeup: debug

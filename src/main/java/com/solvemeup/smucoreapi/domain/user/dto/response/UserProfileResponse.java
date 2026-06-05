@@ -1,9 +1,8 @@
 package com.solvemeup.smucoreapi.domain.user.dto.response;
 
-import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
-import com.solvemeup.smucoreapi.domain.user.entity.Role;
-import com.solvemeup.smucoreapi.domain.user.entity.Status;
+import com.solvemeup.smucoreapi.domain.user.entity.User;
+import com.solvemeup.smucoreapi.domain.user.entity.UserRole;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRankingProjection;
 
 public record UserProfileResponse(
@@ -14,8 +13,7 @@ public record UserProfileResponse(
         String githubUrl,
         String techblogUrl,
         int rating,
-        Role role,
-        Status status,
+        UserRole role,
         long rank
 ) {
     public static UserProfileResponse from(User user, long rank) {
@@ -28,7 +26,6 @@ public record UserProfileResponse(
                 user.getTechblogUrl(),
                 user.getRating(),
                 user.getRole(),
-                user.getStatus(),
                 rank
         );
     }
@@ -43,7 +40,6 @@ public record UserProfileResponse(
                 p.getTechblogUrl(),
                 p.getRating(),
                 p.getRole(),
-                p.getStatus(),
                 p.getRank()
         );
     }

@@ -1,18 +1,8 @@
 package com.solvemeup.smucoreapi.domain.auth.oauth2.service;
 
-import com.solvemeup.smucoreapi.domain.auth.exception.BlockedUserException;
-import com.solvemeup.smucoreapi.domain.auth.exception.NicknameGenerationFailedException;
-import com.solvemeup.smucoreapi.domain.auth.oauth2.exception.InvalidOAuth2RegistrationIdException;
-import com.solvemeup.smucoreapi.domain.auth.oauth2.exception.OAuth2AttributeMissingException;
-import com.solvemeup.smucoreapi.domain.auth.oauth2.exception.UnsupportedOAuth2ProviderException;
-import com.solvemeup.smucoreapi.domain.auth.oauth2.principal.CustomOAuth2User;
-import com.solvemeup.smucoreapi.domain.auth.oauth2.principal.LoginEvent;
-import com.solvemeup.smucoreapi.domain.auth.oauth2.response.OAuth2Response;
-import com.solvemeup.smucoreapi.domain.auth.oauth2.response.OAuth2ResponseFactory;
-import com.solvemeup.smucoreapi.domain.user.entity.User;
-import com.solvemeup.smucoreapi.domain.user.repository.UserInternalRepository;
-import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
-import com.solvemeup.smucoreapi.domain.user.util.NicknameGenerator;
+import com.solvemeup.smucoreapi.domain.auth.exception.OAuth2LoginException;
+import com.solvemeup.smucoreapi.domain.auth.oauth2.userinfo.OAuth2UserInfo;
+import com.solvemeup.smucoreapi.domain.auth.oauth2.userinfo.OAuth2UserInfoFactory;
 import com.solvemeup.smucoreapi.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,163 +13,70 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import static com.solvemeup.smucoreapi.domain.auth.oauth2.principal.LoginEvent.*;
-import static com.solvemeup.smucoreapi.domain.user.entity.Status.*;
-import static com.solvemeup.smucoreapi.global.exception.ErrorCode.*;
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.OAUTH2_LOGIN_FAILED;
 
 /**
- * OAuth2 로그인 과정에서 사용자 정보를 로드하고
- * 애플리케이션 사용자 도메인과 연동하는 커스텀 OAuth2UserService.
+ * OAuth2 로그인 시 공급자 사용자 정보를 로드하는 커스텀 OAuth2UserService.
  *
- * <p>OAuth2 공급자(Google, GitHub 등)로부터 전달받은 사용자 정보를 기반으로
- * 사용자를 조회하거나 신규 생성하며, 사용자 상태에 따라 다음과 같이 처리한다:
+ * <p>공급자 userinfo 조회(HTTP)는 트랜잭션 밖에서 수행하고,
+ * 사용자 계정 연동(조회·생성·복구)은 {@link OAuth2UserResolver}에 위임하여
+ * 별도 트랜잭션으로 처리한다. (HTTP 호출이 DB 트랜잭션 안에서 커넥션을 점유하지 않도록 분리.)
  *
- * <ul>
- *   <li>신규 사용자: 랜덤 닉네임을 부여하여 회원 가입</li>
- *   <li>차단된 사용자(BLOCKED): 로그인 차단</li>
- *   <li>탈퇴 사용자(DELETED): 계정 복구 후 로그인</li>
- *   <li>익명화 사용자(ANONYMIZED): 계정 복구 후 로그인</li>
- * </ul>
- *
- * <p>도메인 계층에서 발생한 예외는
- * {@link org.springframework.security.oauth2.core.OAuth2AuthenticationException}으로 변환되어
- * Spring Security 인증 흐름으로 전달된다.
+ * <p>처리 중 발생한 도메인 예외는 {@link OAuth2AuthenticationException}으로 변환되어
+ * Spring Security 인증 실패 흐름으로 전달된다.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private final UserRepository userRepository;
-    private final UserInternalRepository userInternalRepository;
-    private final NicknameGenerator nicknameGenerator;
-
-    private static final int RETRY_LIMIT = 3;
+    private final OAuth2UserResolver oauth2UserResolver;
 
     /**
-     * OAuth2 인증 요청을 처리하여 애플리케이션 내부 사용자 정보를 로드한다.
-     *
-     * <p>OAuth2 공급자 응답을 파싱한 뒤, 사용자 조회, 생성, 복구 또는 차단 여부를 판단하여 {@link CustomOAuth2User}를 반환한다.
+     * OAuth2 인증 요청을 처리하여 애플리케이션 인증 Principal을 반환한다.
      *
      * @throws OAuth2AuthenticationException OAuth2 인증 과정에서 오류가 발생한 경우
      */
     @Override
-    @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         try {
-            OAuth2Response response = parseOAuth2Response(userRequest);
-
-            User user = userInternalRepository
-                    .findIncludingDeletedByOauth2ProviderAndOauth2ProviderId(
-                            response.getOAuth2Provider(),
-                            response.getOAuth2ProviderId()
-                    )
-                    .orElse(null);
-
-            if (user == null) {
-                user = createUserWithUniqueNickname(response);
-                return buildCustomOAuth2User(user, SIGNED_UP);
-            }
-
-            if (user.getStatus() == BLOCKED) {
-                throw new BlockedUserException();
-            }
-
-            if (user.getStatus() == DELETED) {
-                user.restoreFromDeleted();
-                return buildCustomOAuth2User(user, RESTORED_FROM_DELETED);
-            }
-
-            if (user.getStatus() == ANONYMIZED) {
-                user.restoreFromAnonymized();
-                return buildCustomOAuth2User(user, RESTORED_FROM_ANONYMIZED);
-            }
-
-            return buildCustomOAuth2User(user, NONE);
-        } catch (InvalidOAuth2RegistrationIdException e) {
-            throw wrapOAuth2AuthenticationException(OAUTH2_INVALID_REGISTRATION_ID, e);
-        } catch (UnsupportedOAuth2ProviderException e) {
-            throw wrapOAuth2AuthenticationException(OAUTH2_UNSUPPORTED_PROVIDER, e);
-        } catch (OAuth2AttributeMissingException e) {
-            throw wrapOAuth2AuthenticationException(OAUTH2_MISSING_ATTRIBUTE, e);
-        } catch (BlockedUserException e) {
-            throw wrapOAuth2AuthenticationException(AUTH_BLOCKED_USER, e);
-        } catch (NicknameGenerationFailedException e) {
-            throw wrapOAuth2AuthenticationException(NICKNAME_GENERATION_FAILED, e);
+            OAuth2UserInfo userInfo = parseOAuth2UserInfo(userRequest);
+            return oauth2UserResolver.resolve(userInfo);
+        } catch (OAuth2LoginException e) {
+            throw wrapOAuth2AuthenticationException(e.getErrorCode(), e);
+        } catch (DataIntegrityViolationException e) {
+            throw wrapOAuth2AuthenticationException(OAUTH2_LOGIN_FAILED, e);
         }
     }
 
     /**
-     * OAuth2 공급자 응답을 파싱하여 {@link OAuth2Response}로 변환한다.
+     * 공급자 userinfo를 조회(HTTP)하여 {@link OAuth2UserInfo}로 변환한다.
      *
-     * <p>Spring Security의 기본 OAuth2UserService를 통해
-     * 사용자 attributes를 로드한 뒤,
-     * 공급자별 응답 객체로 변환한다.
+     * <p>{@link DefaultOAuth2UserService}가 로드한 원본 attributes를 공급자별 구현체로 매핑한다.
      */
-    private OAuth2Response parseOAuth2Response(OAuth2UserRequest userRequest) {
+    private OAuth2UserInfo parseOAuth2UserInfo(OAuth2UserRequest userRequest) {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
         log.debug("OAuth2 registrationId={}", userRequest.getClientRegistration().getRegistrationId());
         log.debug("OAuth2 attributes keys={}", oAuth2User.getAttributes().keySet());
 
-        return OAuth2ResponseFactory.of(
+        return OAuth2UserInfoFactory.of(
                 userRequest.getClientRegistration().getRegistrationId(),
                 oAuth2User.getAttributes()
         );
     }
 
     /**
-     * 사용자 정보와 로그인 이벤트를 기반으로
-     * {@link CustomOAuth2User}를 생성한다.
-     */
-    private CustomOAuth2User buildCustomOAuth2User(User user, LoginEvent event) {
-        log.debug(
-                "OAuth2 login result: userId={}, event={}, status={}",
-                user.getId(),
-                event,
-                user.getStatus()
-        );
-
-        return new CustomOAuth2User(user.getId(), user.getRole(), event);
-    }
-
-    /**
-     * 랜덤 닉네임을 부여하여 신규 사용자를 생성한다.
+     * 도메인 예외를 Spring Security가 처리하는 {@link OAuth2AuthenticationException}으로 변환한다.
      *
-     * <p>닉네임 중복이 발생할 경우 최대 {@value #RETRY_LIMIT}회까지 재시도한다.
-     *
-     * @throws NicknameGenerationFailedException 주어진 시도 횟수 내에 유니크한 닉네임을 생성하지 못한 경우
-     */
-    private User createUserWithUniqueNickname(OAuth2Response response) {
-        DataIntegrityViolationException lastException = null;
-
-        for (int attempt = 1; attempt <= RETRY_LIMIT; attempt++) {
-            try {
-                log.debug("Nickname generation attempt {}", attempt);
-
-                return userRepository.save(
-                        User.createUser(
-                                response.getOAuth2Provider(),
-                                response.getOAuth2ProviderId(),
-                                nicknameGenerator.generate()
-                        )
-                );
-            } catch (DataIntegrityViolationException e) {
-                lastException = e;
-            }
-        }
-
-        throw new NicknameGenerationFailedException(RETRY_LIMIT, lastException);
-    }
-
-    /**
-     * 도메인 예외를 OAuth2 인증 예외로 변환한다.
-     *
-     * <p>에러 코드는 {@link ErrorCode}를 기반으로 하며, Spring Security 인증 실패 처리 흐름으로 전달된다.
+     * <p>{@link ErrorCode}를 {@link OAuth2Error}에 실어 인증 실패 핸들러로 전달한다.
      */
     private OAuth2AuthenticationException wrapOAuth2AuthenticationException(ErrorCode errorCode, RuntimeException e) {
-        return new OAuth2AuthenticationException(new OAuth2Error(errorCode.getCode(), errorCode.getDefaultMessage(), null), errorCode.getDefaultMessage(), e);
+        return new OAuth2AuthenticationException(
+                new OAuth2Error(errorCode.getCode(), errorCode.getDefaultMessage(), null),
+                errorCode.getDefaultMessage(),
+                e
+        );
     }
 }

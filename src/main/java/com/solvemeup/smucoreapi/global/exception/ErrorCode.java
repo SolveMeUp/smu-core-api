@@ -17,7 +17,6 @@ public enum ErrorCode {
     // OAuth2
     // =========================
     OAUTH2_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "OAUTH2-001", "OAuth2 로그인에 실패했습니다."),
-    OAUTH2_INVALID_REGISTRATION_ID(HttpStatus.BAD_REQUEST, "OAUTH2-002", "잘못된 OAuth2 registrationId 입니다."),
     OAUTH2_UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST, "OAUTH2-003", "지원하지 않는 OAuth2 Provider 입니다."),
     OAUTH2_MISSING_ATTRIBUTE(HttpStatus.INTERNAL_SERVER_ERROR, "OAUTH2-004", "OAuth2 응답 필수 값이 누락되었습니다."),
 
@@ -25,7 +24,6 @@ public enum ErrorCode {
     // User
     // =========================
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER-001", "해당 유저를 찾을 수 없습니다."),
-    NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "USER-002", "닉네임 생성에 실패했습니다."),
     INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "USER-003", "닉네임이 올바르지 않습니다."),
     NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-004", "중복된 닉네임입니다."),
 

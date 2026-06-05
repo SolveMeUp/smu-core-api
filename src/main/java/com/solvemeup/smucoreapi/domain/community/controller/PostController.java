@@ -61,7 +61,7 @@ public class PostController {
             @AuthUser CustomOAuth2User user,
             @Valid @RequestBody PostCreateRequest request
     ) {
-        PostResponse response = postService.create(user.getUserId(), request);
+        PostResponse response = postService.create(user.userId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -71,7 +71,7 @@ public class PostController {
             @PathVariable Long postId,
             @Valid @RequestBody PostUpdateRequest request
     ) {
-        return ResponseEntity.ok(postService.update(user.getUserId(), postId, request));
+        return ResponseEntity.ok(postService.update(user.userId(), postId, request));
     }
 
     @DeleteMapping("/{postId}")
@@ -79,7 +79,7 @@ public class PostController {
             @AuthUser CustomOAuth2User user,
             @PathVariable Long postId
     ) {
-        postService.delete(user.getUserId(), postId);
+        postService.delete(user.userId(), postId);
         return ResponseEntity.noContent().build();
     }
 
@@ -88,7 +88,7 @@ public class PostController {
             @AuthUser CustomOAuth2User user,
             @PathVariable Long postId
     ) {
-        postService.react(user.getUserId(), postId, ReactionType.LIKE);
+        postService.react(user.userId(), postId, ReactionType.LIKE);
         return ResponseEntity.ok().build();
     }
 
@@ -97,7 +97,7 @@ public class PostController {
             @AuthUser CustomOAuth2User user,
             @PathVariable Long postId
     ) {
-        postService.react(user.getUserId(), postId, ReactionType.DISLIKE);
+        postService.react(user.userId(), postId, ReactionType.DISLIKE);
         return ResponseEntity.ok().build();
     }
 
@@ -111,7 +111,7 @@ public class PostController {
             @PathVariable Long postId,
             @Valid @RequestBody CommentCreateRequest request
     ) {
-        CommentResponse response = commentService.create(user.getUserId(), postId, request);
+        CommentResponse response = commentService.create(user.userId(), postId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -121,7 +121,7 @@ public class PostController {
             @PathVariable Long postId,
             @PathVariable Long commentId
     ) {
-        commentService.delete(user.getUserId(), postId, commentId);
+        commentService.delete(user.userId(), postId, commentId);
         return ResponseEntity.noContent().build();
     }
 
@@ -130,7 +130,7 @@ public class PostController {
             @AuthUser CustomOAuth2User user,
             @PathVariable Long commentId
     ) {
-        commentService.react(user.getUserId(), commentId, ReactionType.LIKE);
+        commentService.react(user.userId(), commentId, ReactionType.LIKE);
         return ResponseEntity.ok().build();
     }
 
@@ -139,7 +139,7 @@ public class PostController {
             @AuthUser CustomOAuth2User user,
             @PathVariable Long commentId
     ) {
-        commentService.react(user.getUserId(), commentId, ReactionType.DISLIKE);
+        commentService.react(user.userId(), commentId, ReactionType.DISLIKE);
         return ResponseEntity.ok().build();
     }
 }

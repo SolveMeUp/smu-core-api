@@ -1,8 +1,7 @@
 package com.solvemeup.smucoreapi.domain.user.repository;
 
 import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
-import com.solvemeup.smucoreapi.domain.user.entity.Role;
-import com.solvemeup.smucoreapi.domain.user.entity.Status;
+import com.solvemeup.smucoreapi.domain.user.entity.UserRole;
 
 /**
  * 사용자 랭킹 조회 결과를 표현하는 Projection.
@@ -29,9 +28,7 @@ public interface UserRankingProjection {
 
     int getRating();
 
-    Role getRole();
-
-    Status getStatus();
+    UserRole getRole();
 
     long getRank();
 }

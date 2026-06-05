@@ -1,6 +1,6 @@
 package com.solvemeup.smucoreapi.domain.auth.dto.response;
 
-import com.solvemeup.smucoreapi.domain.user.entity.Role;
+import com.solvemeup.smucoreapi.domain.user.entity.UserRole;
 
-public record MyAuthResponse(Long userId, Role role) {
+public record MyAuthResponse(Long userId, UserRole role) {
 }

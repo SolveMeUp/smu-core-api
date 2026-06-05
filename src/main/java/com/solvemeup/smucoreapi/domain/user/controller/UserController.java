@@ -6,8 +6,8 @@ import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyNicknameRequest;
 import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyTechblogUrlRequest;
 import com.solvemeup.smucoreapi.domain.user.dto.response.*;
 import com.solvemeup.smucoreapi.domain.user.service.UserService;
-import com.solvemeup.smucoreapi.global.security.annotation.AuthUserId;
 import com.solvemeup.smucoreapi.global.api.dto.response.PageResponse;
+import com.solvemeup.smucoreapi.global.security.annotation.AuthUserId;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -34,8 +34,8 @@ public class UserController {
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<Void> softDeleteUser(@AuthUserId Long userId) {
-        userService.softDeleteUser(userId);
+    public ResponseEntity<Void> withdrawMyAccount(@AuthUserId Long userId) {
+        userService.withdrawMyAccount(userId);
         return ResponseEntity.ok().build();
     }
 

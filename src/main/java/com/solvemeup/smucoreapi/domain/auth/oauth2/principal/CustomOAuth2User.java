@@ -1,6 +1,6 @@
 package com.solvemeup.smucoreapi.domain.auth.oauth2.principal;
 
-import com.solvemeup.smucoreapi.domain.user.entity.Role;
+import com.solvemeup.smucoreapi.domain.user.entity.UserRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -17,7 +17,7 @@ import java.util.Map;
  * <p>세션 기반 인증을 전제로 하며, Redis 등 외부 세션 저장소에
  * 직렬화되어 저장되므로 {@link Serializable}을 구현한다.
  */
-public record CustomOAuth2User(Long userId, Role role) implements OAuth2User, Serializable {
+public record CustomOAuth2User(Long userId, UserRole role) implements OAuth2User, Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

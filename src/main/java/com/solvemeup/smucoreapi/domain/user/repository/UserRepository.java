@@ -1,21 +1,24 @@
 package com.solvemeup.smucoreapi.domain.user.repository;
 
+import com.solvemeup.smucoreapi.domain.user.entity.OAuth2Provider;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
+import com.solvemeup.smucoreapi.domain.user.entity.UserStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-/**
- * 서비스에 노출되는 사용자 조회 전용 리포지토리.
- *
- * <p>ACTIVE, BLOCKED 상태의 사용자만 조회 대상이며,
- * 탈퇴(DELETED) 사용자는 제외한다.
- *
- * <p>랭킹 조회 시 {@code rank} 값은 전체 사용자 기준의 순위를 의미한다.
- */
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    Optional<User> findByIdAndStatusNot(Long id, UserStatus status);
+
+    Optional<User> findByOauth2ProviderAndOauth2ProviderId(OAuth2Provider oauth2Provider, String oauth2ProviderId);
+
+    boolean existsByNickname(String nickname);
+
+    long countByStatusNotAndRatingGreaterThan(UserStatus status, int rating);
 
     @Query(value = """
             SELECT
@@ -27,25 +30,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 u.techblog_url AS techblogUrl,
                 u.rating AS rating,
                 u.role AS role,
-                u.status AS status,
                 RANK() OVER (ORDER BY u.rating DESC) AS `rank`
             FROM users u
-            WHERE u.status <> 'DELETED'
+            WHERE u.status <> 'WITHDRAWN'
             ORDER BY u.rating DESC, u.id
             """,
             countQuery = """
                     SELECT COUNT(*)
                     FROM users u
-                    WHERE u.status <> 'DELETED'
+                    WHERE u.status <> 'WITHDRAWN'
                     """,
             nativeQuery = true
     )
     Page<UserRankingProjection> findUserRankingPageWithRank(Pageable pageable);
-
-    @Query(value = """
-            SELECT COUNT(*) + 1
-            FROM users u
-            WHERE u.status <> 'DELETED' AND u.rating > :rating
-            """, nativeQuery = true)
-    long calculateCompetitionRankByRating(@Param("rating") int rating);
 }

@@ -1,7 +1,7 @@
 package com.solvemeup.smucoreapi.domain.judge.problem.entity;
 
 import com.solvemeup.smucoreapi.domain.user.entity.User;
-import com.solvemeup.smucoreapi.global.entity.SoftDeleteEntity;
+import com.solvemeup.smucoreapi.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,7 +15,7 @@ import java.util.List;
 @Table(name = "problems")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Problem extends SoftDeleteEntity {
+public class Problem extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,15 +25,13 @@ public class Problem extends SoftDeleteEntity {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String title;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT", nullable = false)
+    @Column(columnDefinition = "MEDIUMTEXT", nullable = false)
     private String description;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String constraints;
 
     @Column(nullable = false)
@@ -42,16 +40,16 @@ public class Problem extends SoftDeleteEntity {
     @Column(nullable = false)
     private int memoryLimitKilobytes;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String functionName;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "json", nullable = false)
+    @Column(nullable = false)
     private List<FunctionParameter> parameters;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ValueType returnType;
+    private DataType returnType;
 
     @Column(nullable = false)
     private int difficulty;
@@ -60,5 +58,9 @@ public class Problem extends SoftDeleteEntity {
     private int submissionCount;
 
     @Column(nullable = false)
-    private int solvedCount;
+    private int solvedUserCount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProblemStatus status;
 }

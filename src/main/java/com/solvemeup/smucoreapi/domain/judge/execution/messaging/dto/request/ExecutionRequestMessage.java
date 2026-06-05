@@ -1,16 +1,17 @@
-package com.solvemeup.smucoreapi.domain.judge.submission.messaging.dto.request;
+package com.solvemeup.smucoreapi.domain.judge.execution.messaging.dto.request;
 
 import com.solvemeup.smucoreapi.domain.judge.common.Language;
 import com.solvemeup.smucoreapi.domain.judge.problem.entity.DataType;
 
 import java.util.List;
 
-public record SubmissionRequestMessage(
-        Long submissionId,
+public record ExecutionRequestMessage(
+        Long executionId,
         Long problemId,
         String functionName,
-        List<SubmissionParameter> parameters,
+        List<ExecutionParameter> parameters,
         DataType returnType,
+        List<ExecutionTestCase> testCases,
         int timeLimitMillis,
         int memoryLimitKilobytes,
         Language language,

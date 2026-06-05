@@ -1,7 +1,7 @@
 package com.solvemeup.smucoreapi.domain.judge.submission.messaging.producer;
 
-import com.solvemeup.smucoreapi.global.messaging.config.RabbitConfig;
 import com.solvemeup.smucoreapi.domain.judge.submission.messaging.dto.request.SubmissionRequestMessage;
+import com.solvemeup.smucoreapi.global.messaging.config.RabbitConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;

@@ -1,5 +1,7 @@
 package com.solvemeup.smucoreapi.domain.judge.submission.entity;
 
+import com.solvemeup.smucoreapi.domain.judge.common.Language;
+import com.solvemeup.smucoreapi.domain.judge.common.Verdict;
 import com.solvemeup.smucoreapi.domain.judge.problem.entity.Problem;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.global.entity.CreatedTimeEntity;
@@ -7,6 +9,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 import static com.solvemeup.smucoreapi.domain.judge.submission.entity.SubmissionStatus.*;
 
@@ -29,22 +33,37 @@ public class Submission extends CreatedTimeEntity {
     private Problem problem;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private Language language;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT", nullable = false)
+    @Column(columnDefinition = "MEDIUMTEXT", nullable = false)
     private String sourceCode;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private SubmissionStatus status;
 
-    public static Submission create(User user,
-                                    Problem problem,
-                                    Language language,
-                                    String sourceCode
-    ) {
+    @Enumerated(EnumType.STRING)
+    private Verdict verdict;
+
+    private Integer failedCaseIndex;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String arguments;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String expectedOutput;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String actualOutput;
+
+    private Integer timeUsedMillis;
+
+    private Integer memoryUsedKilobytes;
+
+    private LocalDateTime finishedAt;
+
+    public static Submission create(User user, Problem problem, Language language, String sourceCode) {
         Submission submission = new Submission();
         submission.user = user;
         submission.problem = problem;
@@ -54,7 +73,24 @@ public class Submission extends CreatedTimeEntity {
         return submission;
     }
 
-    public void markDone() {
+    public void markDone(Verdict verdict,
+                         Integer failedCaseIndex,
+                         String arguments,
+                         String expectedOutput,
+                         String actualOutput,
+                         Integer timeUsedMillis,
+                         Integer memoryUsedKilobytes) {
+        if (this.status == DONE) {
+            return;
+        }
         this.status = DONE;
+        this.verdict = verdict;
+        this.failedCaseIndex = failedCaseIndex;
+        this.arguments = arguments;
+        this.expectedOutput = expectedOutput;
+        this.actualOutput = actualOutput;
+        this.timeUsedMillis = timeUsedMillis;
+        this.memoryUsedKilobytes = memoryUsedKilobytes;
+        this.finishedAt = LocalDateTime.now();
     }
 }

@@ -1,7 +1,7 @@
 package com.solvemeup.smucoreapi.domain.user.entity;
 
 import com.solvemeup.smucoreapi.domain.user.exception.InvalidNicknameException;
-import com.solvemeup.smucoreapi.global.entity.BaseTimeEntity;
+import com.solvemeup.smucoreapi.global.entity.ModifiedTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,7 +21,7 @@ import static com.solvemeup.smucoreapi.domain.user.entity.UserStatus.WITHDRAWN;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends BaseTimeEntity {
+public class User extends ModifiedTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

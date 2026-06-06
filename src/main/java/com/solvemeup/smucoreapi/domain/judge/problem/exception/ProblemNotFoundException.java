@@ -1,10 +1,10 @@
 package com.solvemeup.smucoreapi.domain.judge.problem.exception;
 
-import com.solvemeup.smucoreapi.global.exception.CustomException;
+import com.solvemeup.smucoreapi.global.exception.BusinessException;
 
 import static com.solvemeup.smucoreapi.global.exception.ErrorCode.PROBLEM_NOT_FOUND;
 
-public class ProblemNotFoundException extends CustomException {
+public class ProblemNotFoundException extends BusinessException {
 
     public ProblemNotFoundException() {
         super(PROBLEM_NOT_FOUND);

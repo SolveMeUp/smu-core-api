@@ -6,7 +6,7 @@ import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyNicknameRequest;
 import com.solvemeup.smucoreapi.domain.user.dto.request.UpdateMyTechblogUrlRequest;
 import com.solvemeup.smucoreapi.domain.user.dto.response.*;
 import com.solvemeup.smucoreapi.domain.user.service.UserService;
-import com.solvemeup.smucoreapi.global.api.dto.response.PageResponse;
+import com.solvemeup.smucoreapi.global.dto.response.PageResponse;
 import com.solvemeup.smucoreapi.global.security.annotation.AuthUserId;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

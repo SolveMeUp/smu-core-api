@@ -1,7 +1,7 @@
 package com.solvemeup.smucoreapi.domain.judge.problem.entity;
 
 import com.solvemeup.smucoreapi.domain.user.entity.User;
-import com.solvemeup.smucoreapi.global.entity.BaseTimeEntity;
+import com.solvemeup.smucoreapi.global.entity.ModifiedTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,7 +15,7 @@ import java.util.List;
 @Table(name = "problems")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Problem extends BaseTimeEntity {
+public class Problem extends ModifiedTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

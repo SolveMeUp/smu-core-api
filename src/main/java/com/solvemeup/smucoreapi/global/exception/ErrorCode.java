@@ -17,15 +17,15 @@ public enum ErrorCode {
     // OAuth2
     // =========================
     OAUTH2_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "OAUTH2-001", "OAuth2 로그인에 실패했습니다."),
-    OAUTH2_UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST, "OAUTH2-003", "지원하지 않는 OAuth2 Provider 입니다."),
-    OAUTH2_MISSING_ATTRIBUTE(HttpStatus.INTERNAL_SERVER_ERROR, "OAUTH2-004", "OAuth2 응답 필수 값이 누락되었습니다."),
+    OAUTH2_UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST, "OAUTH2-002", "지원하지 않는 OAuth2 Provider입니다."),
+    OAUTH2_MISSING_ATTRIBUTE(HttpStatus.INTERNAL_SERVER_ERROR, "OAUTH2-003", "OAuth2 응답 필수 값이 누락되었습니다."),
 
     // =========================
     // User
     // =========================
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER-001", "해당 유저를 찾을 수 없습니다."),
-    INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "USER-003", "닉네임이 올바르지 않습니다."),
-    NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-004", "중복된 닉네임입니다."),
+    USER_INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "USER-002", "닉네임이 올바르지 않습니다."),
+    USER_NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-003", "중복된 닉네임입니다."),
 
     // =========================
     // Problem
@@ -33,21 +33,21 @@ public enum ErrorCode {
     PROBLEM_NOT_FOUND(HttpStatus.NOT_FOUND, "PROBLEM-001", "해당 문제를 찾을 수 없습니다."),
 
     // =========================
-    // SUBMISSION
+    // Submission
     // =========================
-    SUBMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "JUDGE-001", "해당 제출을 찾을 수 없습니다."),
+    SUBMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "SUBMISSION-001", "해당 제출을 찾을 수 없습니다."),
 
     // =========================
-    // EXECUTION
+    // Execution
     // =========================
-    EXECUTION_NOT_FOUND(HttpStatus.NOT_FOUND, "JUDGE-002", "해당 실행을 찾을 수 없습니다."),
+    EXECUTION_NOT_FOUND(HttpStatus.NOT_FOUND, "EXECUTION-001", "해당 실행을 찾을 수 없습니다."),
 
     // =========================
     // Common
     // =========================
     COMMON_BAD_REQUEST(HttpStatus.BAD_REQUEST, "COMMON-001", "잘못된 요청입니다."),
-    COMMON_INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON-002", "서버 오류가 발생했습니다."),
-    COMMON_METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "COMMON-003", "지원하지 않는 HTTP 메서드입니다.");
+    COMMON_METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "COMMON-002", "지원하지 않는 HTTP 메서드입니다."),
+    COMMON_INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON-003", "서버 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String code;

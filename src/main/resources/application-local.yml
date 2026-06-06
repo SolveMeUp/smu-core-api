@@ -1,8 +1,4 @@
 spring:
-  config:
-    activate:
-      on-profile: local
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -13,13 +9,13 @@ spring:
   elasticsearch:
     uris: http://localhost:9200
 
-app:
-  security:
-    csrf:
-      enabled: false   # 로컬 개발·테스트 무마찰을 위해 비활성
-
 logging:
   level:
     com.solvemeup: debug
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+
+app:
+  security:
+    csrf:
+      enabled: false   # 로컬 개발·테스트 무마찰을 위해 비활성

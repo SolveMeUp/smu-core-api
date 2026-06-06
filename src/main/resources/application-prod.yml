@@ -1,21 +1,4 @@
 spring:
-  config:
-    activate:
-      on-profile: prod
-
   jpa:
     hibernate:
       ddl-auto: validate
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info, prometheus, metrics, loggers
-  endpoint:
-    health:
-      show-details: always
-  prometheus:
-    metrics:
-      export:
-        enabled: true

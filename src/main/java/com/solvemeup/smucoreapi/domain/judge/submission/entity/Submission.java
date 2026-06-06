@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import static com.solvemeup.smucoreapi.domain.judge.submission.entity.SubmissionStatus.*;
+import static com.solvemeup.smucoreapi.domain.judge.submission.entity.SubmissionStatus.DONE;
+import static com.solvemeup.smucoreapi.domain.judge.submission.entity.SubmissionStatus.PENDING;
 
 @Entity
 @Table(name = "submissions")

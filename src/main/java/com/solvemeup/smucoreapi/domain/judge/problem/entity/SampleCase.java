@@ -1,6 +1,6 @@
 package com.solvemeup.smucoreapi.domain.judge.problem.entity;
 
-import com.solvemeup.smucoreapi.global.entity.BaseTimeEntity;
+import com.solvemeup.smucoreapi.global.entity.ModifiedTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SampleCase extends BaseTimeEntity {
+public class SampleCase extends ModifiedTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

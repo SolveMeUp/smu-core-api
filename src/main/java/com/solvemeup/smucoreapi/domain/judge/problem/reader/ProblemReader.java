@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.solvemeup.smucoreapi.domain.judge.problem.entity.ProblemStatus.*;
+import static com.solvemeup.smucoreapi.domain.judge.problem.entity.ProblemStatus.PUBLISHED;
 
 @Component
 @RequiredArgsConstructor

@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import static com.solvemeup.smucoreapi.domain.judge.execution.entity.ExecutionStatus.*;
+import static com.solvemeup.smucoreapi.domain.judge.execution.entity.ExecutionStatus.DONE;
+import static com.solvemeup.smucoreapi.domain.judge.execution.entity.ExecutionStatus.RUNNING;
 
 @Entity
 @Table(name = "executions")

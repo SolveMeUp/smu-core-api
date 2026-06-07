@@ -58,6 +58,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/logout").permitAll()
                 .requestMatchers("/api/auth/**").authenticated()
 
+                // API 문서 (Swagger UI / OpenAPI 스펙)
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+
                 // 모니터링
                 .requestMatchers("/actuator/**").permitAll()
 

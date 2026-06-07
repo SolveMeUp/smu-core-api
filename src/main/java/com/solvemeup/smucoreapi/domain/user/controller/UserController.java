@@ -8,6 +8,7 @@ import com.solvemeup.smucoreapi.domain.user.dto.response.*;
 import com.solvemeup.smucoreapi.domain.user.service.UserService;
 import com.solvemeup.smucoreapi.global.dto.response.PageResponse;
 import com.solvemeup.smucoreapi.global.security.annotation.AuthUserId;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "User", description = "유저 프로필·랭킹 조회 및 내 정보 수정 API")
 @Validated
 @RestController
 @RequestMapping("/api/users")

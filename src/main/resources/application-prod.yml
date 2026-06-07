@@ -2,3 +2,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+
+# API 문서: 운영에서는 비활성 (UI/스펙 모두 차단). dev/local은 기본값(활성) 유지
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

@@ -1,8 +1,12 @@
 package com.solvemeup.smucoreapi.domain.community.exception;
 
-public class CommentNotFoundException extends RuntimeException {
+import com.solvemeup.smucoreapi.global.exception.BusinessException;
 
-    public CommentNotFoundException(Long commentId) {
-        super("댓글을 찾을 수 없습니다. commentId=" + commentId);
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.COMMUNITY_COMMENT_NOT_FOUND;
+
+public class CommentNotFoundException extends BusinessException {
+
+    public CommentNotFoundException() {
+        super(COMMUNITY_COMMENT_NOT_FOUND);
     }
 }

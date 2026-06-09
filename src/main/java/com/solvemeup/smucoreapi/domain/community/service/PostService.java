@@ -3,7 +3,7 @@ package com.solvemeup.smucoreapi.domain.community.service;
 import com.solvemeup.smucoreapi.domain.community.dto.request.PostCreateRequest;
 import com.solvemeup.smucoreapi.domain.community.dto.request.PostUpdateRequest;
 import com.solvemeup.smucoreapi.domain.community.dto.response.CommentResponse;
-import com.solvemeup.smucoreapi.domain.community.dto.response.PageResponse;
+import com.solvemeup.smucoreapi.domain.community.dto.response.CursorResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PostDetailResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PostResponse;
 import com.solvemeup.smucoreapi.domain.community.entity.Comment;
@@ -14,18 +14,17 @@ import com.solvemeup.smucoreapi.domain.community.messaging.event.PostIndexEvent;
 import com.solvemeup.smucoreapi.domain.community.repository.CommentRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostReactionRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostRepository;
-import com.solvemeup.smucoreapi.domain.community.exception.*;
+import com.solvemeup.smucoreapi.domain.community.exception.ForbiddenException;
+import com.solvemeup.smucoreapi.domain.community.exception.PostNotFoundException;
 import com.solvemeup.smucoreapi.domain.community.viewcount.ViewCountStorage;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
-import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
+import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
 import com.solvemeup.smucoreapi.global.cache.CacheConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import com.solvemeup.smucoreapi.domain.community.dto.response.CursorResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,15 +41,9 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostReactionRepository postReactionRepository;
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
+    private final UserReader userReader;
     private final ApplicationEventPublisher eventPublisher;
     private final ViewCountStorage viewCountStorage;
-
-    public PageResponse<PostResponse> findAll(Pageable pageable) {
-        Page<Post> posts = postRepository.findAllActive(pageable);
-        Page<PostResponse> postResponses = posts.map(PostResponse::from);
-        return PageResponse.from(postResponses);
-    }
 
     public CursorResponse<PostResponse> findAllByCursor(Long lastId, int size) {
         Pageable pageable = Pageable.ofSize(size + 1);
@@ -74,7 +67,7 @@ public class PostService {
     @Cacheable(value = CacheConfig.POST_DETAIL, key = "#postId")
     public PostDetailResponse findById(Long postId) {
         Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(PostNotFoundException::new);
 
         List<CommentResponse> comments = getCommentsWithReplies(postId);
 
@@ -87,8 +80,7 @@ public class PostService {
 
     @Transactional
     public PostResponse create(Long userId, PostCreateRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userReader.getUser(userId);
 
         Post post = Post.create(user, request.title(), request.content());
         Post savedPost = postRepository.save(post);
@@ -102,7 +94,7 @@ public class PostService {
     @Transactional
     public PostResponse update(Long userId, Long postId, PostUpdateRequest request) {
         Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(PostNotFoundException::new);
 
         if (!post.isOwner(userId)) {
             throw ForbiddenException.postModify();
@@ -119,7 +111,7 @@ public class PostService {
     @Transactional
     public void delete(Long userId, Long postId) {
         Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(PostNotFoundException::new);
 
         if (!post.isOwner(userId)) {
             throw ForbiddenException.postDelete();
@@ -130,13 +122,13 @@ public class PostService {
         eventPublisher.publishEvent(PostIndexEvent.delete(postId));
     }
 
+    @CacheEvict(value = CacheConfig.POST_DETAIL, key = "#postId")
     @Transactional
     public void react(Long userId, Long postId, ReactionType reactionType) {
         Post post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(PostNotFoundException::new);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userReader.getUser(userId);
 
         Optional<PostReaction> existingReaction = postReactionRepository.findByPostIdAndUserId(postId, userId);
 

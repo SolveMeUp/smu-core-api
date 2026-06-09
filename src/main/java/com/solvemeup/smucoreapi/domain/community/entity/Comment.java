@@ -71,6 +71,7 @@ public class Comment extends BaseEntity {
         reply.content = content;
         reply.likeCount = 0;
         reply.dislikeCount = 0;
+        parent.replies.add(reply);
         return reply;
     }
 
@@ -100,5 +101,21 @@ public class Comment extends BaseEntity {
 
     public boolean isReply() {
         return this.parent != null;
+    }
+
+    public int deleteThread() {
+        if (isDeleted()) {
+            return 0;
+        }
+
+        delete();
+        int deletedCount = 1;
+        for (Comment reply : replies) {
+            if (!reply.isDeleted()) {
+                reply.delete();
+                deletedCount++;
+            }
+        }
+        return deletedCount;
     }
 }

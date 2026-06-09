@@ -1,8 +1,12 @@
 package com.solvemeup.smucoreapi.domain.community.exception;
 
-public class InvalidReplyDepthException extends RuntimeException {
+import com.solvemeup.smucoreapi.global.exception.BusinessException;
+
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.COMMUNITY_INVALID_REPLY_DEPTH;
+
+public class InvalidReplyDepthException extends BusinessException {
 
     public InvalidReplyDepthException() {
-        super("대댓글에는 답글을 작성할 수 없습니다.");
+        super(COMMUNITY_INVALID_REPLY_DEPTH);
     }
 }

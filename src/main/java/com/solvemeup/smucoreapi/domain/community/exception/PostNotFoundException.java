@@ -1,8 +1,12 @@
 package com.solvemeup.smucoreapi.domain.community.exception;
 
-public class PostNotFoundException extends RuntimeException {
+import com.solvemeup.smucoreapi.global.exception.BusinessException;
 
-    public PostNotFoundException(Long postId) {
-        super("게시글을 찾을 수 없습니다. postId=" + postId);
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.COMMUNITY_POST_NOT_FOUND;
+
+public class PostNotFoundException extends BusinessException {
+
+    public PostNotFoundException() {
+        super(COMMUNITY_POST_NOT_FOUND);
     }
 }

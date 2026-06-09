@@ -1,5 +1,6 @@
 package com.solvemeup.smucoreapi.domain.community.service;
 
+import com.solvemeup.smucoreapi.domain.community.cache.PostDetailCache;
 import com.solvemeup.smucoreapi.domain.community.dto.request.CommentCreateRequest;
 import com.solvemeup.smucoreapi.domain.community.dto.response.CommentResponse;
 import com.solvemeup.smucoreapi.domain.community.entity.Comment;
@@ -13,9 +14,8 @@ import com.solvemeup.smucoreapi.domain.community.exception.PostNotFoundException
 import com.solvemeup.smucoreapi.domain.community.repository.CommentReactionRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.CommentRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostRepository;
-import com.solvemeup.smucoreapi.domain.community.exception.*;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
-import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
+import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,22 +30,26 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentReactionRepository commentReactionRepository;
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
+    private final UserReader userReader;
+    private final PostDetailCache postDetailCache;
 
     @Transactional
     public CommentResponse create(Long userId, Long postId, CommentCreateRequest request) {
         Post post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(PostNotFoundException::new);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userReader.getUser(userId);
 
         Comment comment;
 
         if (request.parentId() != null) {
             // 대댓글
             Comment parent = commentRepository.findByIdAndNotDeleted(request.parentId())
-                    .orElseThrow(() -> new CommentNotFoundException(request.parentId()));
+                    .orElseThrow(CommentNotFoundException::new);
+
+            if (!parent.getPost().getId().equals(postId)) {
+                throw new CommentNotFoundException();
+            }
 
             // 1 - depth 제한
             if (parent.isReply()) {
@@ -60,17 +64,17 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
         post.incrementCommentCount();
-
+        postDetailCache.evictAfterCommit(postId);
         return CommentResponse.from(savedComment);
     }
 
     @Transactional
     public void delete(Long userId, Long postId, Long commentId) {
         Comment comment = commentRepository.findByIdWithPost(commentId)
-                .orElseThrow(() -> new CommentNotFoundException(commentId));
+                .orElseThrow(CommentNotFoundException::new);
 
         if (!comment.getPost().getId().equals(postId)) {
-            throw new CommentNotFoundException(commentId);
+            throw new CommentNotFoundException();
         }
 
         if (!comment.isOwner(userId)) {
@@ -79,24 +83,19 @@ public class CommentService {
 
         Post post = comment.getPost();
 
-        int replyCount = (int) comment.getReplies().stream()
-                .filter(reply -> !reply.isDeleted())
-                .count();
-
-        comment.delete();
-
-        for (int i = 0; i <= replyCount; i++) {
+        int deletedCount = comment.deleteThread();
+        for (int i = 0; i < deletedCount; i++) {
             post.decrementCommentCount();
         }
+        postDetailCache.evictAfterCommit(postId);
     }
 
     @Transactional
     public void react(Long userId, Long commentId, ReactionType reactionType) {
         Comment comment = commentRepository.findByIdAndNotDeleted(commentId)
-                .orElseThrow(() -> new CommentNotFoundException(commentId));
+                .orElseThrow(CommentNotFoundException::new);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userReader.getUser(userId);
 
         Optional<CommentReaction> existingReaction = commentReactionRepository.findByCommentIdAndUserId(commentId, userId);
 
@@ -132,5 +131,7 @@ public class CommentService {
                 comment.incrementDislikeCount();
             }
         }
+
+        postDetailCache.evictAfterCommit(comment.getPost().getId());
     }
 }

@@ -3,7 +3,7 @@ package com.solvemeup.smucoreapi.domain.community.service;
 import com.solvemeup.smucoreapi.domain.community.dto.request.PostCreateRequest;
 import com.solvemeup.smucoreapi.domain.community.dto.request.PostUpdateRequest;
 import com.solvemeup.smucoreapi.domain.community.dto.response.CommentResponse;
-import com.solvemeup.smucoreapi.domain.community.dto.response.PageResponse;
+import com.solvemeup.smucoreapi.domain.community.dto.response.CursorResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PostDetailResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PostResponse;
 import com.solvemeup.smucoreapi.domain.community.entity.Comment;
@@ -24,9 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import com.solvemeup.smucoreapi.domain.community.dto.response.CursorResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,12 +44,6 @@ public class PostService {
     private final UserReader userReader;
     private final ApplicationEventPublisher eventPublisher;
     private final ViewCountStorage viewCountStorage;
-
-    public PageResponse<PostResponse> findAll(Pageable pageable) {
-        Page<Post> posts = postRepository.findAllActive(pageable);
-        Page<PostResponse> postResponses = posts.map(PostResponse::from);
-        return PageResponse.from(postResponses);
-    }
 
     public CursorResponse<PostResponse> findAllByCursor(Long lastId, int size) {
         Pageable pageable = Pageable.ofSize(size + 1);

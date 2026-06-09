@@ -1,9 +1,10 @@
 package com.solvemeup.smucoreapi.domain.community.service;
 
 import com.solvemeup.smucoreapi.domain.community.document.PostDocument;
-import com.solvemeup.smucoreapi.domain.community.dto.response.PageResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PostSearchResponse;
+import com.solvemeup.smucoreapi.global.dto.response.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -38,16 +39,6 @@ public class PostSearchService {
                 .toList();
 
         long totalHits = hits.getTotalHits();
-        int totalPages = (int) Math.ceil((double) totalHits / pageable.getPageSize());
-
-        return PageResponse.<PostSearchResponse>builder()
-                .content(results)
-                .page(pageable.getPageNumber())
-                .size(pageable.getPageSize())
-                .totalElements(totalHits)
-                .totalPages(totalPages)
-                .first(pageable.getPageNumber() == 0)
-                .last(pageable.getPageNumber() >= totalPages - 1)
-                .build();
+        return PageResponse.from(new PageImpl<>(results, pageable, totalHits));
     }
 }

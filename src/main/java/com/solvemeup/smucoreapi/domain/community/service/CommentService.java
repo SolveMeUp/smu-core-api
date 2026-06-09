@@ -13,7 +13,6 @@ import com.solvemeup.smucoreapi.domain.community.exception.PostNotFoundException
 import com.solvemeup.smucoreapi.domain.community.repository.CommentReactionRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.CommentRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostRepository;
-import com.solvemeup.smucoreapi.domain.community.exception.*;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,7 @@ public class CommentService {
     @Transactional
     public CommentResponse create(Long userId, Long postId, CommentCreateRequest request) {
         Post post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(PostNotFoundException::new);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -45,7 +44,11 @@ public class CommentService {
         if (request.parentId() != null) {
             // 대댓글
             Comment parent = commentRepository.findByIdAndNotDeleted(request.parentId())
-                    .orElseThrow(() -> new CommentNotFoundException(request.parentId()));
+                    .orElseThrow(CommentNotFoundException::new);
+
+            if (!parent.getPost().getId().equals(postId)) {
+                throw new CommentNotFoundException();
+            }
 
             // 1 - depth 제한
             if (parent.isReply()) {
@@ -67,10 +70,10 @@ public class CommentService {
     @Transactional
     public void delete(Long userId, Long postId, Long commentId) {
         Comment comment = commentRepository.findByIdWithPost(commentId)
-                .orElseThrow(() -> new CommentNotFoundException(commentId));
+                .orElseThrow(CommentNotFoundException::new);
 
         if (!comment.getPost().getId().equals(postId)) {
-            throw new CommentNotFoundException(commentId);
+            throw new CommentNotFoundException();
         }
 
         if (!comment.isOwner(userId)) {
@@ -93,7 +96,7 @@ public class CommentService {
     @Transactional
     public void react(Long userId, Long commentId, ReactionType reactionType) {
         Comment comment = commentRepository.findByIdAndNotDeleted(commentId)
-                .orElseThrow(() -> new CommentNotFoundException(commentId));
+                .orElseThrow(CommentNotFoundException::new);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));

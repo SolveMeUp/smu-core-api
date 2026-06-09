@@ -14,7 +14,8 @@ import com.solvemeup.smucoreapi.domain.community.messaging.event.PostIndexEvent;
 import com.solvemeup.smucoreapi.domain.community.repository.CommentRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostReactionRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostRepository;
-import com.solvemeup.smucoreapi.domain.community.exception.*;
+import com.solvemeup.smucoreapi.domain.community.exception.ForbiddenException;
+import com.solvemeup.smucoreapi.domain.community.exception.PostNotFoundException;
 import com.solvemeup.smucoreapi.domain.community.viewcount.ViewCountStorage;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
@@ -74,7 +75,7 @@ public class PostService {
     @Cacheable(value = CacheConfig.POST_DETAIL, key = "#postId")
     public PostDetailResponse findById(Long postId) {
         Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(PostNotFoundException::new);
 
         List<CommentResponse> comments = getCommentsWithReplies(postId);
 
@@ -102,7 +103,7 @@ public class PostService {
     @Transactional
     public PostResponse update(Long userId, Long postId, PostUpdateRequest request) {
         Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(PostNotFoundException::new);
 
         if (!post.isOwner(userId)) {
             throw ForbiddenException.postModify();
@@ -119,7 +120,7 @@ public class PostService {
     @Transactional
     public void delete(Long userId, Long postId) {
         Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(PostNotFoundException::new);
 
         if (!post.isOwner(userId)) {
             throw ForbiddenException.postDelete();
@@ -133,7 +134,7 @@ public class PostService {
     @Transactional
     public void react(Long userId, Long postId, ReactionType reactionType) {
         Post post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(PostNotFoundException::new);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));

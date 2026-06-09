@@ -1,20 +1,26 @@
 package com.solvemeup.smucoreapi.domain.community.exception;
 
-public class ForbiddenException extends RuntimeException {
+import com.solvemeup.smucoreapi.global.exception.BusinessException;
+import com.solvemeup.smucoreapi.global.exception.ErrorCode;
 
-    public ForbiddenException(String message) {
-        super(message);
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.COMMUNITY_COMMENT_FORBIDDEN;
+import static com.solvemeup.smucoreapi.global.exception.ErrorCode.COMMUNITY_POST_FORBIDDEN;
+
+public class ForbiddenException extends BusinessException {
+
+    private ForbiddenException(ErrorCode errorCode) {
+        super(errorCode);
     }
 
     public static ForbiddenException postModify() {
-        return new ForbiddenException("게시글을 수정할 권한이 없습니다.");
+        return new ForbiddenException(COMMUNITY_POST_FORBIDDEN);
     }
 
     public static ForbiddenException postDelete() {
-        return new ForbiddenException("게시글을 삭제할 권한이 없습니다.");
+        return new ForbiddenException(COMMUNITY_POST_FORBIDDEN);
     }
 
     public static ForbiddenException commentDelete() {
-        return new ForbiddenException("댓글을 삭제할 권한이 없습니다.");
+        return new ForbiddenException(COMMUNITY_COMMENT_FORBIDDEN);
     }
 }

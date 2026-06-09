@@ -80,13 +80,8 @@ public class CommentService {
 
         Post post = comment.getPost();
 
-        int replyCount = (int) comment.getReplies().stream()
-                .filter(reply -> !reply.isDeleted())
-                .count();
-
-        comment.delete();
-
-        for (int i = 0; i <= replyCount; i++) {
+        int deletedCount = comment.deleteThread();
+        for (int i = 0; i < deletedCount; i++) {
             post.decrementCommentCount();
         }
     }

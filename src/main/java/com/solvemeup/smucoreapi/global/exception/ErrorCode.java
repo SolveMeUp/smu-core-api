@@ -28,6 +28,15 @@ public enum ErrorCode {
     USER_NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-003", "중복된 닉네임입니다."),
 
     // =========================
+    // Community
+    // =========================
+    COMMUNITY_POST_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMUNITY-001", "해당 게시글을 찾을 수 없습니다."),
+    COMMUNITY_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMUNITY-002", "해당 댓글을 찾을 수 없습니다."),
+    COMMUNITY_INVALID_REPLY_DEPTH(HttpStatus.BAD_REQUEST, "COMMUNITY-003", "대댓글에는 답글을 작성할 수 없습니다."),
+    COMMUNITY_POST_FORBIDDEN(HttpStatus.FORBIDDEN, "COMMUNITY-004", "게시글에 대한 권한이 없습니다."),
+    COMMUNITY_COMMENT_FORBIDDEN(HttpStatus.FORBIDDEN, "COMMUNITY-005", "댓글에 대한 권한이 없습니다."),
+
+    // =========================
     // Problem
     // =========================
     PROBLEM_NOT_FOUND(HttpStatus.NOT_FOUND, "PROBLEM-001", "해당 문제를 찾을 수 없습니다."),

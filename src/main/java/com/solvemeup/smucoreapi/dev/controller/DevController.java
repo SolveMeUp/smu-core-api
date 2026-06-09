@@ -1,6 +1,10 @@
 package com.solvemeup.smucoreapi.dev.controller;
 
 import com.solvemeup.smucoreapi.domain.auth.oauth2.principal.CustomOAuth2User;
+import com.solvemeup.smucoreapi.domain.community.document.PostDocument;
+import com.solvemeup.smucoreapi.domain.community.entity.Post;
+import com.solvemeup.smucoreapi.domain.community.repository.PostESRepository;
+import com.solvemeup.smucoreapi.domain.community.repository.PostRepository;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
 import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,11 +23,14 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +51,8 @@ import java.util.Map;
 public class DevController {
 
     private final UserReader userReader;
+    private final PostRepository postRepository;
+    private final PostESRepository postESRepository;
 
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
@@ -84,6 +93,39 @@ public class DevController {
 
         log.info("[DEV] login success. userId={}", userId);
         return ResponseEntity.ok(Map.of("message", "login success"));
+    }
+
+    @Operation(
+            summary = "ES 벌크 인덱싱",
+            description = "DB의 모든 게시글을 Elasticsearch에 일괄 인덱싱한다. 기존 인덱스 데이터를 지우고 다시 넣는다.")
+    @PostMapping("/reindex-posts")
+    public ResponseEntity<Map<String, Object>> reindexPosts() {
+        postESRepository.deleteAll();
+
+        int page = 0;
+        int batchSize = 500;
+        long total = 0;
+
+        while (true) {
+            Page<Post> batch = postRepository.findAllWithUser(PageRequest.of(page, batchSize));
+            if (batch.isEmpty()) break;
+
+            List<PostDocument> docs = batch.getContent().stream()
+                    .filter(p -> p.getDeletedAt() == null)
+                    .map(p -> PostDocument.of(
+                            p.getId(), p.getTitle(), p.getContent(),
+                            p.getUser().getNickname(), p.getCreatedAt()))
+                    .toList();
+
+            postESRepository.saveAll(docs);
+            total += docs.size();
+
+            if (!batch.hasNext()) break;
+            page++;
+        }
+
+        log.info("[DEV] reindex-posts complete. indexed={}", total);
+        return ResponseEntity.ok(Map.of("message", "reindex complete", "indexed", total));
     }
 
     @Operation(

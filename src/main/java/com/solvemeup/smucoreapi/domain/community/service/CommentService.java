@@ -14,7 +14,7 @@ import com.solvemeup.smucoreapi.domain.community.repository.CommentReactionRepos
 import com.solvemeup.smucoreapi.domain.community.repository.CommentRepository;
 import com.solvemeup.smucoreapi.domain.community.repository.PostRepository;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
-import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
+import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,15 +29,14 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentReactionRepository commentReactionRepository;
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
+    private final UserReader userReader;
 
     @Transactional
     public CommentResponse create(Long userId, Long postId, CommentCreateRequest request) {
         Post post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(PostNotFoundException::new);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userReader.getUser(userId);
 
         Comment comment;
 
@@ -63,7 +62,6 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
         post.incrementCommentCount();
-
         return CommentResponse.from(savedComment);
     }
 
@@ -98,8 +96,7 @@ public class CommentService {
         Comment comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(CommentNotFoundException::new);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userReader.getUser(userId);
 
         Optional<CommentReaction> existingReaction = commentReactionRepository.findByCommentIdAndUserId(commentId, userId);
 

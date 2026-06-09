@@ -18,7 +18,7 @@ import com.solvemeup.smucoreapi.domain.community.exception.ForbiddenException;
 import com.solvemeup.smucoreapi.domain.community.exception.PostNotFoundException;
 import com.solvemeup.smucoreapi.domain.community.viewcount.ViewCountStorage;
 import com.solvemeup.smucoreapi.domain.user.entity.User;
-import com.solvemeup.smucoreapi.domain.user.repository.UserRepository;
+import com.solvemeup.smucoreapi.domain.user.reader.UserReader;
 import com.solvemeup.smucoreapi.global.cache.CacheConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -43,7 +43,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostReactionRepository postReactionRepository;
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
+    private final UserReader userReader;
     private final ApplicationEventPublisher eventPublisher;
     private final ViewCountStorage viewCountStorage;
 
@@ -88,8 +88,7 @@ public class PostService {
 
     @Transactional
     public PostResponse create(Long userId, PostCreateRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userReader.getUser(userId);
 
         Post post = Post.create(user, request.title(), request.content());
         Post savedPost = postRepository.save(post);
@@ -136,8 +135,7 @@ public class PostService {
         Post post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(PostNotFoundException::new);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userReader.getUser(userId);
 
         Optional<PostReaction> existingReaction = postReactionRepository.findByPostIdAndUserId(postId, userId);
 

@@ -26,6 +26,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT p FROM Post p JOIN FETCH p.user WHERE p.id = :id AND p.deletedAt IS NULL")
     Optional<Post> findByIdWithUser(Long id);
 
+    @Query("SELECT p FROM Post p JOIN FETCH p.user WHERE p.id IN :ids AND p.deletedAt IS NULL")
+    List<Post> findAllByIdsWithUser(@Param("ids") List<Long> ids);
+
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Post p SET p.viewCount = p.viewCount + :delta WHERE p.id = :postId")
     void incrementViewCount(@Param("postId") Long postId, @Param("delta") Long delta);

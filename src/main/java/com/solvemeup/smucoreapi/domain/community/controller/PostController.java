@@ -7,7 +7,6 @@ import com.solvemeup.smucoreapi.domain.community.dto.response.CommentResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.CursorResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PostDetailResponse;
 import com.solvemeup.smucoreapi.domain.community.dto.response.PostResponse;
-import com.solvemeup.smucoreapi.domain.community.dto.response.PostSearchResponse;
 import com.solvemeup.smucoreapi.domain.community.service.PostSearchService;
 import com.solvemeup.smucoreapi.domain.community.enums.ReactionType;
 import com.solvemeup.smucoreapi.domain.community.service.CommentService;
@@ -46,7 +45,7 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<PageResponse<PostSearchResponse>> searchPosts(
+    public ResponseEntity<PageResponse<PostResponse>> searchPosts(
             @RequestParam @NotBlank String keyword,
             @PageableDefault(size = 20) Pageable pageable
     ) {

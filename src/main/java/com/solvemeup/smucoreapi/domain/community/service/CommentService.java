@@ -1,5 +1,6 @@
 package com.solvemeup.smucoreapi.domain.community.service;
 
+import com.solvemeup.smucoreapi.domain.community.cache.PostDetailCache;
 import com.solvemeup.smucoreapi.domain.community.dto.request.CommentCreateRequest;
 import com.solvemeup.smucoreapi.domain.community.dto.response.CommentResponse;
 import com.solvemeup.smucoreapi.domain.community.entity.Comment;
@@ -30,6 +31,7 @@ public class CommentService {
     private final CommentReactionRepository commentReactionRepository;
     private final PostRepository postRepository;
     private final UserReader userReader;
+    private final PostDetailCache postDetailCache;
 
     @Transactional
     public CommentResponse create(Long userId, Long postId, CommentCreateRequest request) {
@@ -62,6 +64,7 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
         post.incrementCommentCount();
+        postDetailCache.evictAfterCommit(postId);
         return CommentResponse.from(savedComment);
     }
 
@@ -84,6 +87,7 @@ public class CommentService {
         for (int i = 0; i < deletedCount; i++) {
             post.decrementCommentCount();
         }
+        postDetailCache.evictAfterCommit(postId);
     }
 
     @Transactional
@@ -127,5 +131,7 @@ public class CommentService {
                 comment.incrementDislikeCount();
             }
         }
+
+        postDetailCache.evictAfterCommit(comment.getPost().getId());
     }
 }

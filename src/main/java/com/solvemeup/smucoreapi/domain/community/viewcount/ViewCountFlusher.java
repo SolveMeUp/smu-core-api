@@ -1,5 +1,6 @@
 package com.solvemeup.smucoreapi.domain.community.viewcount;
 
+import com.solvemeup.smucoreapi.domain.community.cache.PostDetailCache;
 import com.solvemeup.smucoreapi.domain.community.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ public class ViewCountFlusher {
 
     private final ViewCountStorage storage;
     private final PostRepository postRepository;
+    private final PostDetailCache postDetailCache;
 
     @Scheduled(fixedRate = 10_000)
     @Transactional
@@ -27,6 +29,7 @@ public class ViewCountFlusher {
         if (deltas.isEmpty()) return;
 
         deltas.forEach(postRepository::incrementViewCount);
+        postDetailCache.evictAfterCommit(deltas.keySet());
         log.debug("Flushed view counts for {} posts", deltas.size());
     }
 }

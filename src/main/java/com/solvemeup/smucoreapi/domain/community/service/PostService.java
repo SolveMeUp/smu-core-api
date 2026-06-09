@@ -122,6 +122,7 @@ public class PostService {
         eventPublisher.publishEvent(PostIndexEvent.delete(postId));
     }
 
+    @CacheEvict(value = CacheConfig.POST_DETAIL, key = "#postId")
     @Transactional
     public void react(Long userId, Long postId, ReactionType reactionType) {
         Post post = postRepository.findByIdAndNotDeleted(postId)

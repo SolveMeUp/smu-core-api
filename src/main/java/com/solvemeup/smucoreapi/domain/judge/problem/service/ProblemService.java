@@ -1,10 +1,13 @@
 package com.solvemeup.smucoreapi.domain.judge.problem.service;
 
 import com.solvemeup.smucoreapi.domain.judge.problem.dto.response.ProblemResponse;
+import com.solvemeup.smucoreapi.domain.judge.problem.dto.response.ProblemSummaryResponse;
 import com.solvemeup.smucoreapi.domain.judge.problem.entity.Problem;
 import com.solvemeup.smucoreapi.domain.judge.problem.entity.SampleCase;
 import com.solvemeup.smucoreapi.domain.judge.problem.reader.ProblemReader;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +19,11 @@ import java.util.List;
 public class ProblemService {
 
     private final ProblemReader problemReader;
+
+    public Page<ProblemSummaryResponse> getProblems(Pageable pageable) {
+        return problemReader.getPublishedProblems(pageable)
+                .map(ProblemSummaryResponse::from);
+    }
 
     public ProblemResponse getProblem(Long problemId) {
         Problem problem = problemReader.getPublishedProblem(problemId);

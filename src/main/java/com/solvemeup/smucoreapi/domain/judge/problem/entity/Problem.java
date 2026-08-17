@@ -58,6 +58,9 @@ public class Problem extends ModifiedTimeEntity {
     private int submissionCount;
 
     @Column(nullable = false)
+    private int solvedCount;
+
+    @Column(nullable = false)
     private int solvedUserCount;
 
     @Enumerated(EnumType.STRING)

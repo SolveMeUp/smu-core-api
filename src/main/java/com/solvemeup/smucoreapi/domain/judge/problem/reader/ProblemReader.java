@@ -6,6 +6,8 @@ import com.solvemeup.smucoreapi.domain.judge.problem.exception.ProblemNotFoundEx
 import com.solvemeup.smucoreapi.domain.judge.problem.repository.ProblemRepository;
 import com.solvemeup.smucoreapi.domain.judge.problem.repository.SampleCaseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,10 @@ public class ProblemReader {
     public Problem getPublishedProblem(Long problemId) {
         return problemRepository.findByIdAndStatus(problemId, PUBLISHED)
                 .orElseThrow(ProblemNotFoundException::new);
+    }
+
+    public Page<Problem> getPublishedProblems(Pageable pageable) {
+        return problemRepository.findByStatus(PUBLISHED, pageable);
     }
 
     public List<SampleCase> getSampleCases(Long problemId) {

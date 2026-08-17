@@ -75,6 +75,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/me/**").authenticated()
                 .requestMatchers("/api/users/**").permitAll()
 
+                // 저지(문제) 도메인
+                .requestMatchers(HttpMethod.GET, "/api/problems/**").permitAll()
+
                 // 커뮤니티 도메인
                 .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                 .requestMatchers("/api/posts/**").authenticated()
